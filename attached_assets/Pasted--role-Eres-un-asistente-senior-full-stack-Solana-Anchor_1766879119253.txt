@@ -1,0 +1,182 @@
+{
+  "role": "Eres un asistente senior full-stack (Solana/Anchor + TypeScript) que trabaja dentro de Replit. Tu objetivo es generar un repositorio completo, compilable y runnable en devnet, para un launchpad de prediction markets de 15 minutos (UP/DOWN) sobre SOL/USD usando Pyth Pull Oracle. Debes producir código real, no pseudocódigo, con instrucciones claras para ejecutar.",
+  "project": {
+    "name": "sol15-prediction-markets",
+    "goal": "Crear mercados de 15 minutos donde usuarios apuestan UP o DOWN con SOL. Fee del 1% se cobra al momento de apostar y va a un treasury global. El pool neto (99%) se reparte a ganadores. Empate (end==start) hace refund del net (fee no se devuelve).",
+    "network": "devnet",
+    "timezone": "Europe/Madrid"
+  },
+  "requirements": {
+    "core_constraints": [
+      "Mercados de 15 minutos exactos: end_ts = start_ts + 900.",
+      "Asset: SOL/USD.",
+      "Oracle: Pyth Pull Oracle (Solana Receiver) en devnet.",
+      "Fee 1% upfront: se cobra en place_bet. Treasury global.",
+      "Min bet: 0.01 SOL (10_000_000 lamports) bruto.",
+      "Se contabiliza NET (gross-fee) en totales y posiciones.",
+      "Up gana si end_price > start_price. Down gana si end_price < start_price. Push si iguales.",
+      "Claim es por usuario (sin loops de apostadores).",
+      "Sin background cron on-chain: incluir keeper off-chain que cree/ cierre / resuelva mercados.",
+      "Permitir que cualquiera pueda llamar close_market y resolve_market (permissionless) para no depender del keeper, pero keeper incluido igualmente."
+    ],
+    "security_checks": [
+      "Staleness check estricto: al leer start_price y end_price exigir publish_time no más viejo que max_staleness_seconds (por defecto 60).",
+      "Validar que el feed sea el de SOL/USD (whitelist en Config).",
+      "Evitar overflows con u128 para multiplicaciones y divisiones; convertir a u64 al final.",
+      "Prevenir double-claim con flag claimed.",
+      "Manejar casos u==0 o d==0 al resolver/claim: si gana un lado con total 0, cancelar mercado y permitir refund neto a todos (o convertir a Push). Debe quedar definido e implementado."
+    ],
+    "product_rules": [
+      "Fee se cobra al apostar (upfront). No se cobra en claim.",
+      "En Push: payout = stake_net (pos.up_net + pos.down_net).",
+      "En Up: payout = floor(pool_net * pos.up_net / total_up_net).",
+      "En Down: payout = floor(pool_net * pos.down_net / total_down_net).",
+      "El 'dust' por rounding queda en market_vault y se puede barrer con sweep_dust (opcional, pero si lo incluyes implementa y documenta)."
+    ]
+  },
+  "pyth": {
+    "solana_receiver_program_devnet": "rec5EKMGg6MxZYaMdyBfgwp4d5rB9T1VQH5pJv5LtFJ",
+    "feed_id_sol_usd_hex": "0xef0d8b6fda2ceba41da15d4095d1da392a0d2f8ed0c6c7bc0f4cfac8c280b56d",
+    "notes": [
+      "Pull Oracle: el programa NO lee un price account legacy; lee una PriceUpdate account creada al postear updates al Receiver.",
+      "El keeper debe postear la actualización de SOL/USD y luego llamar create_market/resolve_market pasando la cuenta PriceUpdate adecuada."
+    ]
+  },
+  "deliverables": {
+    "repo_structure": [
+      "README.md con pasos exactos para correr en Replit",
+      "Anchor program en /programs/pm15/ (Rust)",
+      "IDL + typescript client en /app/ o /client/",
+      "Keeper Node/TS en /keeper/ que: postea Pyth update, crea mercado nuevo cada 15 min, cierra/resuelve mercados vencidos, y puede correr en loop",
+      "Frontend mínimo en /web/ (Next.js o Vite React) con: lista de mercados, detalle de mercado, botones apostar UP/DOWN, claim, y conectar wallet (Solana wallet adapter). Si es demasiado, al menos un CLI TS funcional.",
+      "Tests Anchor en /tests/ con al menos: create_market, place_bet fee upfront, resolve up, resolve down, resolve push, claim payouts correctos, double claim fails"
+    ],
+    "build_and_run": [
+      "Comandos para instalar dependencias (pnpm/npm/yarn) y anchor.",
+      "Comandos para desplegar a devnet (anchor deploy) y configurar el program id.",
+      "Comandos para arrancar keeper y frontend.",
+      "Variables de entorno en .env.example (RPC devnet, wallet keypair path, etc.)."
+    ]
+  },
+  "implementation_details": {
+    "onchain_accounts": {
+      "Config": {
+        "pda_seeds": ["config"],
+        "fields": [
+          "authority: Pubkey",
+          "treasury_vault: Pubkey (PDA)",
+          "fee_bps: u16 (default 100)",
+          "min_bet_lamports: u64 (default 10000000)",
+          "max_staleness_seconds: u32 (default 60)",
+          "allowed_feed_id: [u8;32] (SOL/USD feed id bytes)",
+          "bump: u8"
+        ]
+      },
+      "TreasuryVault": {
+        "type": "SystemAccount PDA",
+        "pda_seeds": ["treasury_vault"]
+      },
+      "Market": {
+        "pda_seeds": ["market", "feed_id_bytes", "start_ts_le_bytes"],
+        "fields": [
+          "feed_id: [u8;32]",
+          "start_ts: i64",
+          "end_ts: i64",
+          "start_price: i64",
+          "start_expo: i32",
+          "end_price: i64",
+          "end_expo: i32",
+          "total_up: u64 (NET)",
+          "total_down: u64 (NET)",
+          "status: enum(Open,Closed,Resolved,Cancelled)",
+          "result: enum(Unset,Up,Down,Push)",
+          "vault_bump: u8",
+          "bump: u8"
+        ]
+      },
+      "MarketVault": {
+        "type": "SystemAccount PDA",
+        "pda_seeds": ["market_vault", "market_pubkey"]
+      },
+      "Position": {
+        "pda_seeds": ["position", "market_pubkey", "user_pubkey"],
+        "fields": [
+          "user: Pubkey",
+          "up: u64 (NET)",
+          "down: u64 (NET)",
+          "claimed: bool",
+          "bump: u8"
+        ]
+      }
+    },
+    "onchain_instructions": [
+      "initialize_config(authority, fee_bps=100, min_bet=10_000_000, max_staleness=60, allowed_feed_id=SOL/USD) -> creates Config + TreasuryVault",
+      "create_market(start_ts, price_update_account) -> reads Pyth price no older than max_staleness; sets start_price/expo; sets end_ts=start_ts+900; creates Market + MarketVault",
+      "place_bet(side, gross_lamports) -> checks min bet; computes fee upfront; transfers net to MarketVault and fee to TreasuryVault; updates totals+position",
+      "close_market() -> requires now>=end_ts; status Open -> Closed",
+      "resolve_market(price_update_account) -> requires status Closed; reads end_price; compares; sets result; status Resolved; if one side would win but that side total==0 then Cancelled (refund net) OR Push (elige una y documéntala; preferible Cancelled con refund)",
+      "claim() -> if Cancelled or Push => payout = pos.up+pos.down; if Up/Down => payout via pari-mutuel net pool; transfer from MarketVault PDA via invoke_signed; mark claimed",
+      "withdraw_fees(to) -> authority-only: move lamports from TreasuryVault PDA to 'to' system account (safe)."
+    ],
+    "pyth_onchain_adapter": [
+      "Usar crate pyth-solana-receiver-sdk (o el equivalente actualizado) para parsear PriceUpdate.",
+      "Implementar función read_pyth_price_no_older_than(price_update_account, feed_id, max_age) -> (price i64, expo i32, publish_time i64).",
+      "Validar que feed_id de la update coincide con Config.allowed_feed_id."
+    ],
+    "keeper": {
+      "language": "TypeScript",
+      "features": [
+        "Conectar a RPC devnet",
+        "Usar @pythnetwork/pyth-solana-receiver para postear price updates del feed SOL/USD",
+        "Crear mercado nuevo cada 15 min alineado a intervalos (opcional: align a :00, :15, :30, :45)",
+        "Cerrar y resolver mercados vencidos",
+        "Soportar modo 'once' (ejecuta una vez) y modo 'loop' (daemon)",
+        "Logs claros"
+      ],
+      "env": [
+        "SOLANA_RPC_URL",
+        "KEEPER_KEYPAIR_PATH",
+        "PROGRAM_ID",
+        "PYTH_RECEIVER_PROGRAM_ID (default devnet)",
+        "SOL_USD_FEED_ID (default el dado)",
+        "MAX_STALENESS_SECONDS (default 60)"
+      ]
+    },
+    "frontend_or_cli": {
+      "minimum": [
+        "Listar mercados (puede ser desde un index local simple o via RPC getProgramAccounts con filtros).",
+        "Mostrar estado (Open/Closed/Resolved/Cancelled), tiempo restante, totales up/down.",
+        "Apostar UP/DOWN con input de SOL (convertir a lamports).",
+        "Claim."
+      ],
+      "nice_to_have": [
+        "Mostrar start_price y end_price con expo",
+        "Mostrar fee cobrada y net",
+        "Mostrar tu posición"
+      ]
+    }
+  },
+  "acceptance_criteria": {
+    "must_pass": [
+      "anchor build y anchor test pasan en local (mock de oracle permitido para tests).",
+      "deploy a devnet funciona y el keeper puede crear y resolver al menos 1 mercado real usando Pyth update.",
+      "place_bet cobra fee upfront correctamente: treasury recibe ~1%, market_vault recibe ~99%.",
+      "push devuelve net (fee no se devuelve).",
+      "double claim falla.",
+      "README describe paso a paso."
+    ],
+    "output_format": [
+      "Genera todos los archivos necesarios con contenido completo.",
+      "Incluye comandos exactos y rutas.",
+      "No dejes TODOs críticos sin implementar."
+    ]
+  },
+  "instructions_to_ai": [
+    "Crea el repositorio completo con todos los archivos.",
+    "Escribe el código completo (Rust + TS) y asegúrate de que compile.",
+    "Si alguna librería exacta no está disponible en Replit, elige alternativa compatible y documenta.",
+    "Mantén el diseño simple y robusto.",
+    "No uses pseudocódigo; escribe implementaciones reales.",
+    "Incluye un mock de Pyth para tests locales si hace falta, pero en devnet usa el receiver real."
+  ]
+}
