@@ -44,8 +44,7 @@ jobs:
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
             ~/.local/share/solana/
-            ~/.avm/
-          key: ${{ runner.os }}-solana-${{ env.SOLANA_VERSION }}-anchor-${{ env.ANCHOR_VERSION }}
+          key: ${{ runner.os }}-solana-${{ env.SOLANA_VERSION }}-anchor-${{ env.ANCHOR_VERSION }}-v2
 
       - name: Install Solana CLI
         run: |
@@ -68,18 +67,15 @@ jobs:
           export PATH="$HOME/.local/share/solana/install/active_release/bin:$PATH"
           solana --version
           
-          if [ ! -f "$HOME/.avm/bin/anchor" ]; then
-            echo "Installing AVM and Anchor v$ANCHOR_VERSION..."
-            cargo install --git https://github.com/coral-xyz/anchor avm --locked --force
-            avm install $ANCHOR_VERSION
-            avm use $ANCHOR_VERSION
+          if [ ! -f "$HOME/.cargo/bin/anchor" ]; then
+            echo "Installing Anchor CLI v$ANCHOR_VERSION directly..."
+            cargo install --git https://github.com/coral-xyz/anchor --tag v$ANCHOR_VERSION anchor-cli --locked --force
           else
-            echo "Anchor already cached"
+            echo "Anchor CLI already cached"
           fi
           
-          export PATH="$HOME/.avm/bin:$PATH"
           anchor --version
-          echo "$HOME/.avm/bin" >> $GITHUB_PATH
+          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
 
       - name: Setup wallet and configure network
         run: |
