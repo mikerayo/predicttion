@@ -1,7 +1,8 @@
 use anchor_lang::prelude::*;
+use anchor_lang::solana_program::{program::invoke_signed, system_instruction};
 use pyth_solana_receiver_sdk::price_update::PriceUpdateV2;
 
-declare_id!("PM15xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+declare_id!("Pm15KGLmRV1RVsJwbpXLGkK3nQr7opqfDYfMTqQeGDF");
 
 pub const FEE_BPS: u16 = 100; // 1%
 pub const MIN_BET_LAMPORTS: u64 = 10_000_000; // 0.01 SOL
@@ -245,17 +246,29 @@ pub mod pm15 {
         
         require!(payout > 0, PredictionError::NoWinnings);
         
-        // Transfer payout from market vault to user
+        // Transfer payout from market vault to user using invoke_signed
         let market_key = ctx.accounts.market.key();
-        let seeds = &[
+        let vault_bump = market.vault_bump;
+        let seeds: &[&[u8]] = &[
             b"market_vault",
             market_key.as_ref(),
-            &[market.vault_bump],
+            &[vault_bump],
         ];
-        let signer = &[&seeds[..]];
+        let signer_seeds = &[seeds];
         
-        **ctx.accounts.market_vault.to_account_info().try_borrow_mut_lamports()? -= payout;
-        **ctx.accounts.user.to_account_info().try_borrow_mut_lamports()? += payout;
+        invoke_signed(
+            &system_instruction::transfer(
+                ctx.accounts.market_vault.key,
+                ctx.accounts.user.key,
+                payout,
+            ),
+            &[
+                ctx.accounts.market_vault.to_account_info(),
+                ctx.accounts.user.to_account_info(),
+                ctx.accounts.system_program.to_account_info(),
+            ],
+            signer_seeds,
+        )?;
         
         position.claimed = true;
         
@@ -269,15 +282,27 @@ pub mod pm15 {
         // Validate authority
         require!(ctx.accounts.authority.key() == config.authority, PredictionError::Unauthorized);
         
-        // Transfer from treasury vault to destination
-        let seeds = &[
+        // Transfer from treasury vault to destination using invoke_signed
+        let treasury_bump = ctx.bumps.treasury_vault;
+        let seeds: &[&[u8]] = &[
             b"treasury_vault",
-            &[ctx.bumps.treasury_vault],
+            &[treasury_bump],
         ];
-        let signer = &[&seeds[..]];
+        let signer_seeds = &[seeds];
         
-        **ctx.accounts.treasury_vault.to_account_info().try_borrow_mut_lamports()? -= amount;
-        **ctx.accounts.destination.to_account_info().try_borrow_mut_lamports()? += amount;
+        invoke_signed(
+            &system_instruction::transfer(
+                ctx.accounts.treasury_vault.key,
+                ctx.accounts.destination.key,
+                amount,
+            ),
+            &[
+                ctx.accounts.treasury_vault.to_account_info(),
+                ctx.accounts.destination.to_account_info(),
+                ctx.accounts.system_program.to_account_info(),
+            ],
+            signer_seeds,
+        )?;
         
         msg!("Withdrawn {} lamports from treasury", amount);
         Ok(())
