@@ -26,12 +26,17 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Anchor (includes Solana CLI + Rust)
-        uses: metadaoproject/setup-anchor@v3.3
-        with:
-          anchor-version: '0.31.0'
-          solana-cli-version: '1.18.17'
-          node-version: '20'
+      - name: Install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+        
+      - name: Install Solana CLI
+        run: |
+          sh -c "$(curl -sSfL https://release.solana.com/v1.18.17/install)"
+          echo "$HOME/.local/share/solana/install/active_release/bin" >> $GITHUB_PATH
+          
+      - name: Install Anchor CLI
+        run: |
+          cargo install --git https://github.com/coral-xyz/anchor --tag v0.30.1 anchor-cli --locked
 
       - name: Setup Solana wallet
         run: |
