@@ -258,8 +258,8 @@ pub mod pm15 {
         
         invoke_signed(
             &system_instruction::transfer(
-                ctx.accounts.market_vault.key,
-                ctx.accounts.user.key,
+                &ctx.accounts.market_vault.key(),
+                &ctx.accounts.user.key(),
                 payout,
             ),
             &[
@@ -292,8 +292,8 @@ pub mod pm15 {
         
         invoke_signed(
             &system_instruction::transfer(
-                ctx.accounts.treasury_vault.key,
-                ctx.accounts.destination.key,
+                &ctx.accounts.treasury_vault.key(),
+                &ctx.accounts.destination.key(),
                 amount,
             ),
             &[
