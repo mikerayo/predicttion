@@ -1,0 +1,37 @@
+Run echo "=== Build Environment ==="
+=== Build Environment ===
+Rust: rustc 1.75.0 (82e1608df 2023-12-21)
+Solana: solana-cli 1.17.31 (src:d0b1f2c7; feat:3746964731, client:SolanaLabs)
+Anchor: anchor-cli 0.29.0
+=== Cargo.toml dependencies ===
+[dependencies]
+anchor-lang = "0.29.0"
+pyth-solana-receiver-sdk = "0.2.0"
+=== Building ===
+    Updating crates.io index
+error: failed to select a version for `solana-address-lookup-table-interface`.
+    ... required by package `solana-program v2.3.0`
+    ... which satisfies dependency `solana-program = ">=1.16.0"` (locked to 2.3.0) of package `pyth-solana-receiver-sdk v0.2.0`
+    ... which satisfies dependency `pyth-solana-receiver-sdk = "^0.2.0"` (locked to 0.2.0) of package `pm15 v0.1.0 (/home/runner/work/predicttion/predicttion/programs/pm15)`
+versions that meet the requirements `^2.2.2` (locked to 2.2.2) are: 2.2.2
+the package `solana-program` depends on `solana-address-lookup-table-interface`, with features: `solana-instruction` but `solana-address-lookup-table-interface` does not have these features.
+ It has an optional dependency with that name, but that dependency uses the "dep:" syntax in the features table, so it does not have an implicit feature with that name.
+failed to select a version for `solana-address-lookup-table-interface` which could resolve this conflict
+=== Build artifacts ===
+total 12
+drwxr-xr-x 2 runner runner 4096 Dec 28 23:39 .
+drwxr-xr-x 5 runner runner 4096 Dec 28 23:39 ..
+-rw------- 1 runner runner  229 Dec 28 23:39 pm15-keypair.json
+ERROR: Build failed - pm15.so not found
+    Updating crates.io index
+error: failed to select a version for `solana-address-lookup-table-interface`.
+    ... required by package `solana-program v2.3.0`
+    ... which satisfies dependency `solana-program = ">=1.16.0"` (locked to 2.3.0) of package `pyth-solana-receiver-sdk v0.2.0`
+    ... which satisfies dependency `pyth-solana-receiver-sdk = "^0.2.0"` (locked to 0.2.0) of package `pm15 v0.1.0 (/home/runner/work/predicttion/predicttion/programs/pm15)`
+versions that meet the requirements `^2.2.2` (locked to 2.2.2) are: 2.2.2
+the package `solana-program` depends on `solana-address-lookup-table-interface`, with features: `solana-instruction` but `solana-address-lookup-table-interface` does not have these features.
+ It has an optional dependency with that name, but that dependency uses the "dep:" syntax in the features table, so it does not have an implicit feature with that name.
+failed to select a version for `solana-address-lookup-table-interface` which could resolve this conflict
+Error: Process completed with exit code 1.
+0s
+0s
