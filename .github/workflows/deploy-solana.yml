@@ -116,7 +116,14 @@ jobs:
           echo "Verifying deployment..."
           sleep 10
           
-          if solana program show $PROGRAM_ID --url https://api.devnet.solana.com; then
+          # Use correct RPC URL for verification based on network
+          if [ "$NETWORK" = "mainnet-beta" ]; then
+            RPC_URL="https://api.mainnet-beta.solana.com"
+          else
+            RPC_URL="https://api.devnet.solana.com"
+          fi
+          
+          if solana program show $PROGRAM_ID --url $RPC_URL; then
             echo ""
             echo "SUCCESS: Program verified on-chain!"
           else
