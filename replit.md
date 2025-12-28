@@ -38,6 +38,22 @@ Preferred communication style: Simple, everyday language.
 - **Pending:** Full Pyth Pull Oracle integration for PriceUpdateV2 accounts
 - Requires posting VAA data to Pyth Receiver before create/resolve calls
 
+## Anchor Workspace Structure
+
+The Anchor program uses a standard workspace layout from the project root:
+```
+/
+├── Anchor.toml        # Workspace config, references programs/pm15
+├── Cargo.toml         # Cargo workspace config
+└── programs/
+    └── pm15/
+        ├── Cargo.toml # Program package config
+        └── src/
+            └── lib.rs # Program source code
+```
+
+**Build commands must be run from the project root**, not from `programs/pm15/`.
+
 ## System Architecture
 
 ### Frontend Architecture
