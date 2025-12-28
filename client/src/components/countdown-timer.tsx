@@ -32,10 +32,10 @@ export function CountdownTimer({ endTs, onExpire, size = "md" }: CountdownTimerP
     return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
   };
 
-  const getUrgencyColor = () => {
-    if (timeRemaining <= 60) return "text-down";
-    if (timeRemaining <= 180) return "text-yellow-500";
-    return "text-foreground";
+  const getUrgencyStyles = () => {
+    if (timeRemaining <= 60) return "text-down countdown-pulse";
+    if (timeRemaining <= 180) return "text-yellow-400";
+    return "text-info";
   };
 
   const sizeClasses = {
@@ -60,7 +60,7 @@ export function CountdownTimer({ endTs, onExpire, size = "md" }: CountdownTimerP
   }
 
   return (
-    <div className={`flex items-center gap-2 font-mono font-bold ${sizeClasses[size]} ${getUrgencyColor()}`}>
+    <div className={`flex items-center gap-2 font-mono font-bold ${sizeClasses[size]} ${getUrgencyStyles()}`}>
       <Clock className={iconSizes[size]} />
       <span data-testid="text-countdown">{formatTime(timeRemaining)}</span>
     </div>

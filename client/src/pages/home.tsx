@@ -24,12 +24,14 @@ export default function Home() {
   const closedMarkets = markets?.filter((m) => m.status !== "Open") ?? [];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background grid-bg">
       <div className="max-w-7xl mx-auto px-4 py-8 space-y-8">
         <div className="space-y-2">
-          <h1 className="text-4xl font-bold">SOL/USD Prediction Markets</h1>
-          <p className="text-lg text-muted-foreground">
-            15-minute prediction markets. Bet UP or DOWN on SOL price movement.
+          <h1 className="text-4xl font-bold tracking-tight">
+            <span className="text-info">SOL/USD</span> PREDICTION MARKETS
+          </h1>
+          <p className="text-lg text-muted-foreground font-mono">
+            15-minute prediction markets. Bet <span className="text-up">UP</span> or <span className="text-down">DOWN</span> on SOL price movement.
           </p>
         </div>
 
@@ -37,9 +39,11 @@ export default function Home() {
 
         <section className="space-y-4">
           <div className="flex items-center justify-between gap-4">
-            <h2 className="text-2xl font-semibold">Active Markets</h2>
+            <h2 className="text-2xl font-semibold flex items-center gap-2">
+              <span className="text-up">ACTIVE</span> MARKETS
+            </h2>
             {activeMarkets.length > 0 && (
-              <span className="text-sm text-muted-foreground">
+              <span className="text-sm text-muted-foreground font-mono">
                 {activeMarkets.length} market{activeMarkets.length !== 1 ? "s" : ""} open
               </span>
             )}
@@ -64,7 +68,7 @@ export default function Home() {
 
         {closedMarkets.length > 0 && (
           <section className="space-y-4">
-            <h2 className="text-2xl font-semibold">Recent Markets</h2>
+            <h2 className="text-2xl font-semibold">RECENT MARKETS</h2>
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {closedMarkets.slice(0, 6).map((market) => (
                 <MarketCard

@@ -89,6 +89,10 @@ export default {
           DEFAULT: "hsl(var(--down) / <alpha-value>)",
           foreground: "hsl(var(--down-foreground) / <alpha-value>)",
         },
+        info: {
+          DEFAULT: "hsl(var(--info) / <alpha-value>)",
+          foreground: "hsl(var(--info-foreground) / <alpha-value>)",
+        },
       },
       fontFamily: {
         sans: ["var(--font-sans)"],

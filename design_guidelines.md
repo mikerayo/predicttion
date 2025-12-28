@@ -1,149 +1,149 @@
-# Design Guidelines: SOL15 Prediction Markets
+# Design Guidelines: SOL15 Prediction Markets - Cyberpunk Edition
 
 ## Design Approach
-**Selected Approach:** Design System (Utility-Focused)
-**Rationale:** This is a financial trading application requiring efficiency, data clarity, and trust. Users need to make quick decisions on time-sensitive markets.
+**Selected Approach:** Design System (Utility-Focused) with Cyberpunk/Fintech Aesthetic
+**Visual Reference:** pimpcard.org - terminal-style trading interface with hacker aesthetic
+**Core Principle:** Immediate data access meets dark cyberpunk elegance. Zero friction between user and market action.
 
-**Design Direction:** Modern DeFi/Trading Platform
-Draw inspiration from: Uniswap's clarity, Linear's precision, Coinbase's trustworthiness
-Focus on: Data hierarchy, real-time updates, decision-making speed
+## Color System
+**Foundation:**
+- Background: Pure black (#000000)
+- Surface/Cards: #0A0A0A with subtle border (#12274A at 20% opacity)
+- Deep Blue Accent: #12274A (primary interactive elements, borders, glows)
 
-## Core Design Elements
+**Trading Indicators:**
+- UP/Bullish: #00FF88 (bright green, cyberpunk neon)
+- DOWN/Bearish: #FF0055 (hot pink/red, neon contrast)
+- Neutral/Info: #00D4FF (cyan accent)
 
-### A. Typography
-- **Primary Font:** Inter (via Google Fonts CDN)
-- **Monospace Font:** JetBrains Mono (for prices, timers, numbers)
+**Text Hierarchy:**
+- Primary: #FFFFFF (high-value data, headers)
+- Secondary: #A0A0A0 (labels, meta information)
+- Tertiary: #606060 (captions, timestamps)
+- Monospace data: #00FF88 or #FF0055 depending on direction
 
-**Hierarchy:**
-- Page Titles: text-4xl font-bold (Inter)
-- Section Headers: text-2xl font-semibold
-- Market Cards: text-xl font-semibold
-- Prices/Numbers: text-2xl font-mono font-bold (JetBrains Mono)
-- Countdown Timers: text-lg font-mono
-- Body Text: text-base font-normal
-- Labels/Meta: text-sm font-medium
-- Captions: text-xs text-opacity-70
+**Status Colors:**
+- Open: #00FF88
+- Closed: #FFB800
+- Resolved: #00D4FF
+- Cancelled: #606060
 
-### B. Layout System
-**Spacing Primitives:** Tailwind units of 2, 4, 6, 8, 12, 16
-- Component padding: p-4, p-6, p-8
-- Section margins: mb-8, mb-12, mb-16
-- Card spacing: gap-6, gap-8
-- Button padding: px-6 py-3, px-8 py-4
+## Typography
+**Fonts (Google Fonts CDN):**
+- UI Text: Inter (400, 500, 600, 700)
+- Financial Data: JetBrains Mono (400, 500, 700)
 
-**Grid System:**
-- Desktop: 2-3 column market cards (grid-cols-1 md:grid-cols-2 lg:grid-cols-3)
-- Mobile: Single column stack
-- Container: max-w-7xl mx-auto px-4
+**Scale:**
+- Hero Numbers: text-6xl font-mono font-bold (price displays)
+- Page Titles: text-3xl font-bold
+- Card Headers: text-xl font-semibold
+- Prices/Pools: text-2xl font-mono font-bold
+- Countdown: text-3xl font-mono (glowing effect)
+- Body: text-base
+- Labels: text-sm font-medium uppercase tracking-wider (terminal-style)
+- Technical Data: text-xs font-mono
 
-### C. Component Library
+## Layout System
+**Spacing:** Tailwind units 2, 4, 6, 8, 12, 16, 20
+**Grid:** max-w-7xl container, 3-column market cards (lg:grid-cols-3 md:grid-cols-2)
+**Card Padding:** p-6 (mobile), p-8 (desktop)
+**Section Gaps:** gap-6 (cards), mb-12 (sections)
 
-**Navigation:**
-- Fixed top bar: Logo left, Wallet connect right
-- Height: h-16
-- Contains: Network indicator (Devnet), Treasury balance display
-- Clean horizontal layout with subtle bottom border
+## Component Library
 
-**Market Card (Primary Component):**
-- Elevated card with subtle border
-- Header: Market timeframe (start → end time), Status badge
-- Body split in 2 columns:
-  - Left: UP betting panel (price display, total pool, bet input, UP button)
-  - Right: DOWN betting panel (identical structure)
-- Center divider: VS indicator
-- Footer: Countdown timer (large, prominent), current price live
-- Status badges: Open (green), Closed (yellow), Resolved (blue), Cancelled (gray)
+**Navigation Bar:**
+- Fixed top, h-16, backdrop-blur-md bg-black/80
+- Left: Logo with glowing accent
+- Center: Network badge (DEVNET - with pulsing indicator)
+- Right: Treasury balance (monospace) + Wallet connect button
+- Bottom border: 1px #12274A glow
 
-**Price Display Component:**
-- Monospace font, large size
-- Start price vs End price comparison
-- Arrow indicator (↑ green for up, ↓ red for down)
-- Expo formatting handled clearly
+**Dashboard Stats Grid:**
+- 4 cards (responsive: lg:grid-cols-4 md:grid-cols-2)
+- Each card: Black background, subtle blue border glow, rounded-xl
+- Large monospace numbers (text-4xl), small uppercase labels
+- Metrics: Active Markets | Total Volume (SOL) | Your Positions | Claimable
+- Hover: Border glow intensifies
 
-**Betting Panel:**
-- SOL input field with validation
-- Fee preview (shows: Gross → Fee (1%) → Net)
-- Large action button (UP = green accent, DOWN = red accent)
-- Min bet indicator below input
+**Market Card (Core Component):**
+- Container: rounded-xl, border border-[#12274A]/20, bg-[#0A0A0A]
+- Header: Flex row with market ID (monospace small), status badge (rounded-full pill), countdown timer (right-aligned, large monospace with subtle glow)
+- Price Display Section: Center-aligned, massive monospace numbers showing Start → Current price with animated arrow
+- Betting Panels: 2-column grid (stacks on mobile)
+  - LEFT: UP panel - green accent border on hover, green button
+  - RIGHT: DOWN panel - red accent border on hover, red button
+  - Each panel: SOL input (dark, monospace), pool display, fee breakdown (terminal-style small text), large action button
+- Center Divider: Vertical line with "VS" badge
+- Footer: Your position summary (if any), claim button (glowing when enabled)
 
-**Position Display:**
-- Your bets: UP amount | DOWN amount
-- Net total at risk
-- Potential payout calculator (live)
-- Claim button (enabled when resolved, shows payout amount)
+**Terminal-Style Data Blocks:**
+- Monospace font throughout
+- Labels: Uppercase, tracked, dim gray
+- Values: Bright white or colored (green/red/cyan)
+- Format: `LABEL............VALUE` (dot leaders for alignment)
+- Border: Subtle cyan glow on left edge (border-l-2 border-cyan-500/50)
 
-**Dashboard Stats:**
-- 4-column stat cards on desktop (2 on tablet, 1 on mobile)
-- Metrics: Active Markets, Total Volume, Your Active Bets, Claimable Winnings
-- Large numbers, small labels
-
-**Forms:**
-- Input fields: Rounded, clear borders, focus states
-- Labels above inputs
-- Helper text below (fees, minimums)
-- Error states with clear messaging
+**Input Fields:**
+- Dark background (#050505), border (#12274A/30)
+- Focus: Border glows (#12274A), blue shadow
+- Monospace for numerical inputs
+- Placeholder: dim gray italic
+- Helper text below: Small monospace, cyan for info, red for errors
 
 **Buttons:**
-- Primary (UP): Large, high contrast, green accent
-- Primary (DOWN): Large, high contrast, red accent  
-- Secondary (Claim): Standard size, blue accent
-- Disabled states: Reduced opacity, cursor-not-allowed
-- Sizes: px-6 py-3 (default), px-8 py-4 (large)
+- UP Button: bg-[#00FF88]/10 text-[#00FF88] border border-[#00FF88]/50, hover:bg-[#00FF88]/20
+- DOWN Button: bg-[#FF0055]/10 text-[#FF0055] border border-[#FF0055]/50, hover:bg-[#FF0055]/20  
+- Claim Button: bg-[#12274A] text-white border border-[#00D4FF]/50, hover:glow effect
+- All: rounded-lg, px-8 py-4, font-semibold, transition-all
+- Disabled: opacity-40, cursor-not-allowed
 
-**Data Tables (Optional):**
-- Market history view
-- Sortable columns: Time, Result, Pool Size, Your Position, Payout
-- Sticky header, zebra striping
+**Status Badges:**
+- Pill shape (rounded-full), px-3 py-1, text-xs font-mono uppercase
+- Glowing border matching status color
+- Background: status color at 10% opacity
 
-**Toast Notifications:**
-- Transaction success/failure feedback
-- Position on screen: top-right
-- Auto-dismiss with manual close option
+**Price Update Indicators:**
+- Flash animation on price change (green flash for up, red for down)
+- Arrow icons (↑↓) with matching color
+- Percentage change in parentheses
 
-### D. Visual Treatments
+## Visual Treatments
 
-**Depth & Elevation:**
-- Cards: Subtle border + minimal shadow (shadow-sm)
-- Interactive elements: Hover lift effect (hover:shadow-md transition)
-- Modals: Strong shadow (shadow-xl)
+**Glow Effects:**
+- Active cards: box-shadow with blue glow
+- Countdown timers: text-shadow cyan glow when < 5min remaining
+- Buttons on hover: subtle color-matched outer glow
+- Borders: Use opacity and shadow for depth
 
-**Data Visualization:**
-- Pool distribution: Horizontal bar showing UP vs DOWN ratio
-- Winner indicator: Checkmark icon + highlight
-- Live countdown: Large, center-aligned, updates per second
+**Terminal Aesthetic:**
+- Scanline overlay (subtle) on data-heavy sections
+- Dotted grid background (very subtle, #12274A/5)
+- Monospace everywhere for numbers and technical data
+- Uppercase labels with letter-spacing
 
-**Micro-interactions:**
-- Button hover: Slight scale (hover:scale-105)
-- Card hover: Shadow increase
-- Loading states: Pulse animation on data refresh
-- Price updates: Flash animation on change
+**Animations (Minimal):**
+- Price updates: 200ms flash
+- Countdown: Pulse when < 60s
+- Hover states: 150ms transition-all
+- Loading: Subtle pulse on skeleton states
+- No elaborate scroll animations
 
-**Responsive Behavior:**
-- Desktop: Side-by-side UP/DOWN panels in market cards
-- Tablet: Stack UP/DOWN vertically within cards
-- Mobile: Full-width stacked layout, larger touch targets
+**Depth System:**
+- Cards: 1px border + subtle inner shadow
+- Modals: Strong outer glow (shadow-2xl with blue tint)
+- Hover elevation: Increase glow, not position
 
-## Images
-No hero image required for this application. This is a utility-first trading interface where immediate data access is critical. Users should see market cards and stats immediately upon landing.
+## Layout Structure
 
-**Icon Usage:**
-- Use Heroicons (via CDN)
-- Icons needed: Clock (timer), TrendingUp/TrendingDown, CheckCircle, XCircle, ExclamationTriangle, Wallet, Chart
-- Size: w-5 h-5 (inline), w-8 h-8 (prominent)
-
-## Layout Specifications
-
-**Landing View:**
-- Dashboard stats row (4 cards)
-- Active markets grid below (3 columns desktop)
-- No hero - immediate utility
+**Landing Page:**
+- No hero image - immediate utility
+- Dashboard stats grid (top)
+- Active markets grid (3 columns)
+- Resolved markets section (collapsed/expandable)
 
 **Market Detail View:**
-- Full-width market card (expanded)
-- Your position prominently displayed
-- Historical price chart (optional enhancement)
-- Claim section if resolved
+- Full-width expanded market card
+- Historical outcome display (terminal table)
+- Your position breakdown (detailed terminal-style)
 
-**Wallet Connection:**
-- Solana Wallet Adapter standard UI
-- Network switcher (locked to Devnet with indicator)
+**Icons:** Heroicons via CDN (outline style, #00D4FF color for info icons, status-colored for directional)

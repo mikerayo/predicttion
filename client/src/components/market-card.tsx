@@ -28,12 +28,15 @@ export function MarketCard({ market, onRefresh }: MarketCardProps) {
   const isResolved = market.status === "Resolved";
 
   return (
-    <Card className="overflow-hidden transition-shadow hover:shadow-md" data-testid={`card-market-${market.publicKey.slice(0, 8)}`}>
+    <Card 
+      className="overflow-visible border-primary/20 hover:border-primary/40 transition-all hover:shadow-lg hover:shadow-primary/10" 
+      data-testid={`card-market-${market.publicKey.slice(0, 8)}`}
+    >
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between gap-2 flex-wrap">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Clock className="h-4 w-4" />
-            <span className="font-mono">
+            <Clock className="h-4 w-4 text-info" />
+            <span className="font-mono text-xs">
               {formatTimestamp(market.startTs)} - {formatTimestamp(market.endTs)}
             </span>
           </div>
@@ -61,7 +64,7 @@ export function MarketCard({ market, onRefresh }: MarketCardProps) {
             />
           ) : (
             <div className="text-right">
-              <span className="text-xs text-muted-foreground">End Price</span>
+              <span className="terminal-label">End Price</span>
               <p className="font-mono text-lg font-bold text-muted-foreground">--</p>
             </div>
           )}
@@ -69,11 +72,11 @@ export function MarketCard({ market, onRefresh }: MarketCardProps) {
 
         <PoolDistribution totalUp={market.totalUp} totalDown={market.totalDown} />
 
-        <div className="flex items-center justify-between gap-4 pt-2 border-t">
+        <div className="flex items-center justify-between gap-4 pt-2 border-t border-primary/10">
           <div className="flex items-center gap-4">
             <div>
-              <p className="text-xs text-muted-foreground">Total Pool</p>
-              <p className="font-mono font-semibold">
+              <p className="terminal-label">Total Pool</p>
+              <p className="font-mono font-bold text-lg">
                 {lamportsToSol(poolTotal).toFixed(2)} SOL
               </p>
             </div>
@@ -85,8 +88,12 @@ export function MarketCard({ market, onRefresh }: MarketCardProps) {
         </div>
 
         <Link href={`/market/${market.publicKey}`}>
-          <Button variant="outline" className="w-full gap-2" data-testid="button-view-market">
-            {isOpen ? "Place Bet" : "View Details"}
+          <Button 
+            variant="outline" 
+            className={`w-full gap-2 border-primary/30 hover:border-primary/50 ${isOpen ? "text-up" : ""}`} 
+            data-testid="button-view-market"
+          >
+            <span className="font-mono">{isOpen ? "PLACE BET" : "VIEW DETAILS"}</span>
             <ArrowRight className="h-4 w-4" />
           </Button>
         </Link>

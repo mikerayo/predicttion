@@ -12,31 +12,35 @@ export function StatusBadge({ status, result }: StatusBadgeProps) {
     switch (status) {
       case "Open":
         return {
-          label: "Open",
+          label: "LIVE",
           icon: Clock,
-          className: "bg-up/15 text-up border-up/30",
+          className: "bg-up/10 text-up border-up/30 glow-up",
         };
       case "Closed":
         return {
-          label: "Closed",
+          label: "CLOSED",
           icon: Lock,
-          className: "bg-yellow-500/15 text-yellow-600 dark:text-yellow-400 border-yellow-500/30",
+          className: "bg-yellow-500/10 text-yellow-400 border-yellow-500/30",
         };
       case "Resolved":
+        const resultLabel = result === "Up" ? "UP WINS" : result === "Down" ? "DOWN WINS" : result === "Push" ? "PUSH" : "RESOLVED";
+        const resultClass = result === "Up" ? "bg-up/10 text-up border-up/30" : 
+                          result === "Down" ? "bg-down/10 text-down border-down/30" : 
+                          "bg-info/10 text-info border-info/30";
         return {
-          label: result ? `Resolved: ${result}` : "Resolved",
+          label: resultLabel,
           icon: CheckCircle,
-          className: "bg-primary/15 text-primary border-primary/30",
+          className: resultClass,
         };
       case "Cancelled":
         return {
-          label: "Cancelled",
+          label: "CANCELLED",
           icon: XCircle,
           className: "bg-muted text-muted-foreground border-border",
         };
       default:
         return {
-          label: status,
+          label: String(status).toUpperCase(),
           icon: Clock,
           className: "bg-muted text-muted-foreground border-border",
         };
@@ -48,7 +52,7 @@ export function StatusBadge({ status, result }: StatusBadgeProps) {
   return (
     <Badge
       variant="outline"
-      className={`gap-1.5 ${config.className}`}
+      className={`gap-1.5 font-mono text-xs tracking-wider ${config.className}`}
       data-testid="badge-status"
     >
       <config.icon className="h-3 w-3" />
