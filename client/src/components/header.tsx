@@ -4,6 +4,8 @@ import { Badge } from "@/components/ui/badge";
 import { ThemeToggle } from "./theme-toggle";
 import { lamportsToSol } from "@shared/schema";
 import { useQuery } from "@tanstack/react-query";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 
 interface PythPrice {
   feedId: string;
@@ -15,21 +17,10 @@ interface PythPrice {
   emaPrice: number;
 }
 
-interface HeaderProps {
-  walletConnected: boolean;
-  walletAddress?: string;
-  treasuryBalance?: number;
-  onConnectWallet: () => void;
-  onDisconnectWallet: () => void;
-}
+export function Header() {
+  const { connected, publicKey, disconnect } = useWallet();
+  const { setVisible } = useWalletModal();
 
-export function Header({
-  walletConnected,
-  walletAddress,
-  treasuryBalance = 0,
-  onConnectWallet,
-  onDisconnectWallet,
-}: HeaderProps) {
   const { data: pythPrice, isLoading: isPriceLoading } = useQuery<PythPrice>({
     queryKey: ["/api/prices/current"],
     refetchInterval: 3000,
@@ -37,6 +28,14 @@ export function Header({
 
   const truncateAddress = (address: string) => {
     return `${address.slice(0, 4)}...${address.slice(-4)}`;
+  };
+
+  const handleConnect = () => {
+    setVisible(true);
+  };
+
+  const handleDisconnect = async () => {
+    await disconnect();
   };
 
   const priceChange = pythPrice ? pythPrice.price - pythPrice.emaPrice : 0;
@@ -86,31 +85,22 @@ export function Header({
               <span className="text-xs font-medium">Devnet</span>
             </Badge>
 
-            {treasuryBalance > 0 && (
-              <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-md bg-muted/50">
-                <span className="text-xs text-muted-foreground">Treasury:</span>
-                <span className="text-sm font-mono font-medium">
-                  {lamportsToSol(treasuryBalance).toFixed(2)} SOL
-                </span>
-              </div>
-            )}
-
-            {walletConnected && walletAddress ? (
+            {connected && publicKey ? (
               <Button
                 variant="outline"
                 size="default"
-                onClick={onDisconnectWallet}
+                onClick={handleDisconnect}
                 className="gap-2"
                 data-testid="button-disconnect-wallet"
               >
                 <Wallet className="h-4 w-4" />
-                <span className="font-mono text-sm">{truncateAddress(walletAddress)}</span>
+                <span className="font-mono text-sm">{truncateAddress(publicKey.toString())}</span>
               </Button>
             ) : (
               <Button
                 variant="default"
                 size="default"
-                onClick={onConnectWallet}
+                onClick={handleConnect}
                 className="gap-2"
                 data-testid="button-connect-wallet"
               >

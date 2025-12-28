@@ -34,7 +34,7 @@ interface Market {
 
 const DEFAULT_CONFIG: KeeperConfig = {
   rpcUrl: process.env.SOLANA_RPC_URL || "https://api.devnet.solana.com",
-  programId: process.env.PROGRAM_ID || "PM15xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+  programId: process.env.PROGRAM_ID || "GEqMQayWYNssnTKPVus8u3yuCFt2xqqfzSyqijqRuiko",
   pythReceiverProgramId: process.env.PYTH_RECEIVER_PROGRAM_ID || "rec5EKMGg6MxZYaMdyBfgwp4d5rB9T1VQH5pJv5LtFJ",
   solUsdFeedId: process.env.SOL_USD_FEED_ID || "0xef0d8b6fda2ceba41da15d4095d1da392a0d2f8ed0c6c7bc0f4cfac8c280b56d",
   maxStalenessSeconds: parseInt(process.env.MAX_STALENESS_SECONDS || "60"),

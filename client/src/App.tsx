@@ -1,9 +1,10 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { Switch, Route } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { SolanaWalletProvider } from "@/lib/wallet-provider";
 import { Header } from "@/components/header";
 import Home from "@/pages/home";
 import MarketDetail from "@/pages/market-detail";
@@ -19,10 +20,7 @@ function Router() {
   );
 }
 
-function App() {
-  const [walletConnected, setWalletConnected] = useState(false);
-  const [walletAddress, setWalletAddress] = useState<string | undefined>();
-
+function AppContent() {
   useEffect(() => {
     const stored = localStorage.getItem("theme");
     const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
@@ -30,33 +28,24 @@ function App() {
     document.documentElement.classList.toggle("dark", initial === "dark");
   }, []);
 
-  const handleConnectWallet = () => {
-    const mockAddress = "7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU";
-    setWalletAddress(mockAddress);
-    setWalletConnected(true);
-  };
+  return (
+    <div className="min-h-screen bg-background">
+      <Header />
+      <main>
+        <Router />
+      </main>
+    </div>
+  );
+}
 
-  const handleDisconnectWallet = () => {
-    setWalletAddress(undefined);
-    setWalletConnected(false);
-  };
-
+function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <div className="min-h-screen bg-background">
-          <Header
-            walletConnected={walletConnected}
-            walletAddress={walletAddress}
-            treasuryBalance={0}
-            onConnectWallet={handleConnectWallet}
-            onDisconnectWallet={handleDisconnectWallet}
-          />
-          <main>
-            <Router />
-          </main>
-        </div>
-        <Toaster />
+        <SolanaWalletProvider>
+          <AppContent />
+          <Toaster />
+        </SolanaWalletProvider>
       </TooltipProvider>
     </QueryClientProvider>
   );
