@@ -109,9 +109,42 @@ Preferred communication style: Simple, everyday language.
 - `esbuild` - Server bundling
 - `tailwindcss` - CSS framework
 
+## Scripts
+
+### Initialize Program
+```bash
+# Dry run - shows what would be done
+npx tsx scripts/initialize-program.ts --dry-run
+
+# Actually initialize (requires KEEPER_PRIVATE_KEY)
+KEEPER_PRIVATE_KEY=<base58_key> npx tsx scripts/initialize-program.ts
+```
+
+### Keeper Service
+```bash
+# Run once
+KEEPER_PRIVATE_KEY=<base58_key> npx tsx keeper/index.ts
+
+# Run in loop mode (every 30 seconds)
+KEEPER_PRIVATE_KEY=<base58_key> npx tsx keeper/index.ts loop 30
+```
+
 ## Next Steps for Production
 
-1. **Initialize Program Config:** Run `initializeConfig` instruction to set up config and treasury vault PDAs
-2. **Pyth Integration:** Complete keeper Pyth Pull Oracle integration to post VAA updates
+1. **Initialize Program Config:** Run `scripts/initialize-program.ts` with a funded devnet wallet to set up config and treasury vault PDAs
+2. **Pyth Integration:** The keeper needs the `@pythnetwork/pyth-solana-receiver` SDK to create PriceUpdateV2 accounts before calling createMarket/resolveMarket
 3. **Test End-to-End:** Test full betting flow with real devnet SOL
 4. **Market Automation:** Run keeper in loop mode for automatic market lifecycle
+
+## Key Files
+
+| File | Purpose |
+|------|---------|
+| `scripts/initialize-program.ts` | One-time program initialization |
+| `keeper/index.ts` | Market lifecycle automation |
+| `client/src/lib/solana-client.ts` | Frontend blockchain interactions |
+| `client/src/hooks/use-blockchain-markets.ts` | React hooks for blockchain data |
+| `shared/anchor-idl.ts` | Shared PDA helpers and types |
+| `shared/schema.ts` | Data types and validation |
+| `server/pythService.ts` | Pyth price fetching for backend |
+| `design_guidelines.md` | UI/UX design system |
