@@ -33,7 +33,9 @@ jobs:
 
       - name: Install Solana CLI and setup PATH
         run: |
-          sh -c "$(curl -sSfL https://release.solana.com/v1.18.17/install)"
+          # Try Anza URL first (new), fallback to Solana Labs URL
+          curl -sSfL https://release.anza.xyz/v1.18.17/install | sh || \
+          curl -sSfL https://release.solana.com/v1.18.17/install | sh
           export PATH="$HOME/.local/share/solana/install/active_release/bin:$PATH"
           echo "$HOME/.local/share/solana/install/active_release/bin" >> $GITHUB_PATH
           solana --version
