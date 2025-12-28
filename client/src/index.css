@@ -43,9 +43,15 @@
   --chart-3: 173 58% 39%;
   --chart-4: 43 74% 49%;
   --chart-5: 27 87% 55%;
-  --font-sans: Open Sans, sans-serif;
+  --font-sans: Inter, sans-serif;
   --font-serif: Georgia, serif;
-  --font-mono: Menlo, monospace;
+  --font-mono: JetBrains Mono, Menlo, monospace;
+  
+  /* Trading colors */
+  --up: 142 71% 45%;
+  --up-foreground: 0 0% 100%;
+  --down: 0 84% 50%;
+  --down-foreground: 0 0% 100%;
   --radius: .5rem;
   --shadow-2xs: 0px 2px 0px 0px hsl(0 0% 0% / 0.00);
   --shadow-xs: 0px 2px 0px 0px hsl(0 0% 0% / 0.00);
@@ -122,6 +128,12 @@
   --destructive-foreground: 0 0% 98%;
   --input: 0 0% 25%;
   --ring: 262 83% 58%;
+  
+  /* Trading colors - dark mode */
+  --up: 142 71% 45%;
+  --up-foreground: 0 0% 100%;
+  --down: 0 84% 50%;
+  --down-foreground: 0 0% 100%;
   --chart-1: 262 70% 70%;
   --chart-2: 220 70% 65%;
   --chart-3: 173 58% 60%;

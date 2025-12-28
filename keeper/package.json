@@ -1,0 +1,19 @@
+{
+  "name": "pm15-keeper",
+  "version": "1.0.0",
+  "description": "SOL15 Prediction Markets Keeper Service",
+  "main": "index.ts",
+  "scripts": {
+    "start": "tsx index.ts once",
+    "loop": "tsx index.ts loop 30",
+    "dev": "tsx watch index.ts once"
+  },
+  "dependencies": {
+    "@solana/web3.js": "^1.87.0",
+    "@pythnetwork/pyth-solana-receiver": "^0.8.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.0"
+  }
+}
