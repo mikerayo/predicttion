@@ -73,6 +73,11 @@ jobs:
       - name: Build Anchor program
         run: |
           echo "Building Anchor program..."
+          
+          # Remove Cargo.lock if it exists (may have incompatible lockfile version)
+          rm -f Cargo.lock
+          echo "Removed Cargo.lock (will be regenerated)"
+          
           anchor build 2>&1 | tee build_output.txt
           BUILD_EXIT_CODE=${PIPESTATUS[0]}
           
