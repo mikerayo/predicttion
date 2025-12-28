@@ -33,15 +33,19 @@ jobs:
 
       - name: Install Solana CLI and setup PATH
         run: |
-          # Use Solana 2.0.x for newer bundled Rust (1.79+)
-          curl -sSfL https://release.anza.xyz/v2.0.21/install | sh
+          # Use stable Solana version with latest platform-tools
+          curl -sSfL https://release.anza.xyz/stable/install | sh
           export PATH="$HOME/.local/share/solana/install/active_release/bin:$PATH"
           echo "$HOME/.local/share/solana/install/active_release/bin" >> $GITHUB_PATH
+          
+          # Clear any cached old platform-tools
+          rm -rf ~/.cache/solana/v* || true
+          
           solana --version
 
       - name: Install Anchor CLI
         run: |
-          cargo install --git https://github.com/coral-xyz/anchor --tag v0.31.0 anchor-cli --locked
+          cargo install --git https://github.com/coral-xyz/anchor --tag v0.30.1 anchor-cli --locked
 
       - name: Setup Solana wallet and configure network
         run: |
@@ -83,23 +87,12 @@ jobs:
           echo "Building Anchor program..."
           echo "Rust version: $(rustc --version)"
           echo "Solana version: $(solana --version)"
+          echo "Anchor version: $(anchor --version)"
           
-          # Pin problematic dependencies to versions compatible with Rust 1.75
-          if [ -f Cargo.lock ]; then
-            rm -f Cargo.lock
-          fi
+          # Remove any existing Cargo.lock to avoid version conflicts
+          rm -f Cargo.lock
           
-          # Generate lockfile and pin problematic crates
-          cargo generate-lockfile
-          cargo update toml_edit --precise 0.22.22
-          cargo update toml_datetime --precise 0.6.8
-          cargo update toml_parser --precise 0.9.3 2>/dev/null || true
-          
-          # Downgrade lockfile version from 4 to 3 for compatibility
-          sed -i 's/^version = 4$/version = 3/' Cargo.lock
-          echo "Cargo.lock version:"
-          head -5 Cargo.lock
-          
+          # Build with Anchor - it will handle dependency resolution
           anchor build 2>&1 | tee build_output.txt
           BUILD_EXIT_CODE=${PIPESTATUS[0]}
           
