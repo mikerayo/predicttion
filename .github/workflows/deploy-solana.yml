@@ -47,36 +47,29 @@ jobs:
             ~/.avm/
           key: ${{ runner.os }}-solana-${{ env.SOLANA_VERSION }}-anchor-${{ env.ANCHOR_VERSION }}
 
-      - name: Install Solana and Anchor
+      - name: Install Solana CLI
         run: |
-          # Install Solana CLI with multiple fallbacks
-          if [ ! -f "$HOME/.local/share/solana/install/active_release/bin/solana" ]; then
-            echo "Installing Solana CLI v$SOLANA_VERSION..."
-            
-            # Try Anza URL first (new infrastructure), then Solana Labs, then direct download
-            if curl -4 --retry 3 --retry-delay 2 --max-time 120 -sSfL "https://release.anza.xyz/v$SOLANA_VERSION/install" | sh; then
-              echo "Installed from Anza"
-            elif curl -4 --retry 3 --retry-delay 2 --max-time 120 -sSfL "https://release.solana.com/v$SOLANA_VERSION/install" | sh; then
-              echo "Installed from Solana Labs"
-            else
-              echo "Downloading from GitHub releases..."
-              curl -4 -L "https://github.com/solana-labs/solana/releases/download/v$SOLANA_VERSION/solana-release-x86_64-unknown-linux-gnu.tar.bz2" -o solana.tar.bz2
-              tar -xjf solana.tar.bz2
-              mkdir -p "$HOME/.local/share/solana/install/active_release"
-              mv solana-release/* "$HOME/.local/share/solana/install/active_release/"
-              rm -rf solana.tar.bz2 solana-release
-            fi
+          SOLANA_DIR="$HOME/.local/share/solana/install/active_release"
+          if [ ! -f "$SOLANA_DIR/bin/solana" ]; then
+            echo "Downloading Solana CLI v$SOLANA_VERSION from GitHub releases..."
+            curl -L "https://github.com/solana-labs/solana/releases/download/v$SOLANA_VERSION/solana-release-x86_64-unknown-linux-gnu.tar.bz2" -o solana.tar.bz2
+            tar -xjf solana.tar.bz2
+            mkdir -p "$SOLANA_DIR"
+            cp -r solana-release/* "$SOLANA_DIR/"
+            chmod +x "$SOLANA_DIR/bin/"*
+            rm -rf solana.tar.bz2 solana-release
           else
             echo "Solana CLI already cached"
           fi
-          
-          # Add to PATH for this step
+          echo "$SOLANA_DIR/bin" >> $GITHUB_PATH
+
+      - name: Install Anchor CLI
+        run: |
           export PATH="$HOME/.local/share/solana/install/active_release/bin:$PATH"
           solana --version
           
-          # Install AVM and Anchor
           if [ ! -f "$HOME/.avm/bin/anchor" ]; then
-            echo "Installing AVM..."
+            echo "Installing AVM and Anchor v$ANCHOR_VERSION..."
             cargo install --git https://github.com/coral-xyz/anchor avm --locked --force
             avm install $ANCHOR_VERSION
             avm use $ANCHOR_VERSION
@@ -86,9 +79,6 @@ jobs:
           
           export PATH="$HOME/.avm/bin:$PATH"
           anchor --version
-          
-          # Save paths for subsequent steps
-          echo "$HOME/.local/share/solana/install/active_release/bin" >> $GITHUB_PATH
           echo "$HOME/.avm/bin" >> $GITHUB_PATH
 
       - name: Setup wallet and configure network
