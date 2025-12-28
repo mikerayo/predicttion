@@ -26,17 +26,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install Rust 1.77 (for lockfile v3 compatibility)
-        uses: dtolnay/rust-toolchain@master
-        with:
-          toolchain: 1.77.0
-          
-      - name: Setup Anchor (includes Solana CLI)
+      - name: Setup Anchor (includes Solana CLI + Rust)
         uses: metadaoproject/setup-anchor@v3.3
         with:
           anchor-version: '0.30.1'
           solana-cli-version: '1.18.17'
           node-version: '20'
+          
+      - name: Install Rust stable (override for lockfile compatibility)
+        uses: dtolnay/rust-toolchain@stable
 
       - name: Setup Solana wallet
         run: |
@@ -78,10 +76,15 @@ jobs:
       - name: Build Anchor program
         run: |
           echo "Building Anchor program..."
+          echo "Rust version: $(rustc --version)"
           
           # Remove Cargo.lock if it exists (may have incompatible lockfile version)
           rm -f Cargo.lock
-          echo "Removed Cargo.lock (will be regenerated)"
+          echo "Removed old Cargo.lock"
+          
+          # Generate fresh lockfile with current stable Rust
+          cargo generate-lockfile
+          echo "Generated new Cargo.lock"
           
           anchor build 2>&1 | tee build_output.txt
           BUILD_EXIT_CODE=${PIPESTATUS[0]}
