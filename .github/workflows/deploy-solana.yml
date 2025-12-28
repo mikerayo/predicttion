@@ -56,6 +56,14 @@ jobs:
           echo "Balance:"
           solana balance
 
+      - name: Setup Program Keypair
+        working-directory: programs/pm15
+        run: |
+          mkdir -p target/deploy
+          echo "${{ secrets.PROGRAM_KEYPAIR }}" > target/deploy/pm15-keypair.json
+          chmod 600 target/deploy/pm15-keypair.json
+          echo "Program ID: $(solana address -k target/deploy/pm15-keypair.json)"
+
       - name: Build Anchor program
         working-directory: programs/pm15
         run: anchor build
