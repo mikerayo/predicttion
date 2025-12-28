@@ -1,6 +1,6 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useParams, Link } from "wouter";
-import { ArrowLeft, ExternalLink } from "lucide-react";
+import { ArrowLeft, ExternalLink, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -12,6 +12,9 @@ import { BettingPanel } from "@/components/betting-panel";
 import { PositionDisplay } from "@/components/position-display";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
+import { solanaClient } from "@/lib/solana-client";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import {
   type Market,
   type Position,
@@ -25,6 +28,8 @@ interface MarketWithPosition extends Market {
 export default function MarketDetail() {
   const { id } = useParams<{ id: string }>();
   const { toast } = useToast();
+  const { connected, publicKey, wallet } = useWallet();
+  const { setVisible } = useWalletModal();
 
   const {
     data: market,
@@ -37,16 +42,23 @@ export default function MarketDetail() {
 
   const placeBetMutation = useMutation({
     mutationFn: async ({ side, grossLamports }: { side: BetSideType; grossLamports: number }) => {
-      return apiRequest("POST", "/api/bets", {
-        marketPubkey: id,
+      if (!connected || !wallet?.adapter) {
+        throw new Error("Please connect your wallet first");
+      }
+
+      const result = await solanaClient.placeBet(
+        wallet.adapter,
+        id!,
         side,
-        grossLamports,
-      });
+        grossLamports
+      );
+      
+      return result;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       toast({
         title: "Bet Placed",
-        description: "Your bet has been placed successfully.",
+        description: `Transaction confirmed: ${data.signature.slice(0, 8)}...`,
       });
       queryClient.invalidateQueries({ queryKey: ["/api/markets", id] });
       queryClient.invalidateQueries({ queryKey: ["/api/stats"] });
@@ -62,14 +74,21 @@ export default function MarketDetail() {
 
   const claimMutation = useMutation({
     mutationFn: async () => {
-      return apiRequest("POST", "/api/claim", {
-        marketPubkey: id,
-      });
+      if (!connected || !wallet?.adapter) {
+        throw new Error("Please connect your wallet first");
+      }
+
+      const result = await solanaClient.claim(
+        wallet.adapter,
+        id!
+      );
+      
+      return result;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       toast({
         title: "Claim Successful",
-        description: "Your winnings have been claimed.",
+        description: `Your winnings have been claimed. TX: ${data.signature.slice(0, 8)}...`,
       });
       queryClient.invalidateQueries({ queryKey: ["/api/markets", id] });
       queryClient.invalidateQueries({ queryKey: ["/api/stats"] });
@@ -84,11 +103,23 @@ export default function MarketDetail() {
   });
 
   const handlePlaceBet = async (side: BetSideType, grossLamports: number) => {
+    if (!connected) {
+      setVisible(true);
+      return;
+    }
     await placeBetMutation.mutateAsync({ side, grossLamports });
   };
 
   const handleClaim = async () => {
+    if (!connected) {
+      setVisible(true);
+      return;
+    }
     await claimMutation.mutateAsync();
+  };
+
+  const handleConnectWallet = () => {
+    setVisible(true);
   };
 
   const formatTimestamp = (ts: number) => {
@@ -231,7 +262,23 @@ export default function MarketDetail() {
           </CardContent>
         </Card>
 
-        {isOpen && (
+        {isOpen && !connected && (
+          <Card className="border-dashed border-2">
+            <CardContent className="py-8 text-center">
+              <Wallet className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+              <h3 className="text-lg font-semibold mb-2">Connect Wallet to Bet</h3>
+              <p className="text-muted-foreground mb-4">
+                Connect your Solana wallet to place bets on this market.
+              </p>
+              <Button onClick={handleConnectWallet} className="gap-2" data-testid="button-connect-to-bet">
+                <Wallet className="h-4 w-4" />
+                Connect Wallet
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
+        {isOpen && connected && (
           <div className="grid gap-6 md:grid-cols-2">
             <BettingPanel
               side="Up"

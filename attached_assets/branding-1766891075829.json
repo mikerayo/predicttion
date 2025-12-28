@@ -1,0 +1,103 @@
+{
+  "colorScheme": "dark",
+  "fonts": [
+    {
+      "family": "Inter",
+      "count": 74
+    },
+    {
+      "family": "sans-serif",
+      "count": 74
+    },
+    {
+      "family": "JetBrains Mono",
+      "count": 1
+    },
+    {
+      "family": "monospace",
+      "count": 1
+    }
+  ],
+  "colors": {
+    "primary": "#9CA3AF",
+    "accent": "#12274A",
+    "background": "#000000",
+    "textPrimary": "#000000",
+    "link": "#12274A"
+  },
+  "typography": {
+    "fontFamilies": {
+      "primary": "Inter",
+      "heading": "Inter"
+    },
+    "fontStacks": {
+      "body": [
+        "Inter",
+        "sans-serif"
+      ],
+      "heading": [
+        "Inter",
+        "sans-serif"
+      ],
+      "paragraph": [
+        "Inter",
+        "sans-serif"
+      ]
+    },
+    "fontSizes": {
+      "h1": "16px",
+      "h2": "14.4px",
+      "body": "18px"
+    }
+  },
+  "spacing": {
+    "baseUnit": 4,
+    "borderRadius": "2px"
+  },
+  "components": {
+    "input": {
+      "background": "#FFFFFF",
+      "textColor": "#FFFFFF",
+      "borderColor": "#E5E7EB",
+      "borderRadius": "8px",
+      "borderRadiusCorners": {
+        "topLeft": "8px",
+        "topRight": "8px",
+        "bottomRight": "8px",
+        "bottomLeft": "8px"
+      },
+      "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.05) 0px 2px 4px 0px inset"
+    }
+  },
+  "images": {
+    "logo": "https://pimpcard.org/favicon.ico",
+    "favicon": "https://pimpcard.org/favicon.ico",
+    "ogImage": null
+  },
+  "__framework_hints": [
+    "tailwind"
+  ],
+  "__llm_logo_reasoning": {
+    "selectedIndex": 0,
+    "reasoning": "Strong indicators: in header, no link (brand logos usually link to homepage, penalty), header location, visible, highest logo on page, alt matches logo/brand, reasonable size. Score: 70 (clear winner by 92 points)",
+    "confidence": 0.9
+  },
+  "__llm_button_reasoning": {
+    "primary": {
+      "index": -1,
+      "text": "N/A",
+      "reasoning": "LLM failed"
+    },
+    "secondary": {
+      "index": -1,
+      "text": "N/A",
+      "reasoning": "LLM failed"
+    },
+    "confidence": 0
+  },
+  "confidence": {
+    "buttons": 0,
+    "colors": 0,
+    "overall": 0
+  }
+}
