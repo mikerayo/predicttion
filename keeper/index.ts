@@ -66,7 +66,7 @@ interface MarketAccount {
 
 const DEFAULT_CONFIG: KeeperConfig = {
   rpcUrl: process.env.SOLANA_RPC_URL || "https://api.devnet.solana.com",
-  programId: process.env.PROGRAM_ID || "gNFRULGxFu27mYmbeZ6oeeZhYMhZkWivqD2eCvEDLqE",
+  programId: process.env.PROGRAM_ID || "EEeQgeh56xge6y82xU9K8sb2PfPs9nXHh3fHrNEwdcrU",
   pythReceiverProgramId: process.env.PYTH_RECEIVER_PROGRAM_ID || "rec5EKMGg6MxZYaMdyBfgwp4d5rB9T1VQH5pJv5LtFJ",
   solUsdFeedId: process.env.SOL_USD_FEED_ID || "0xef0d8b6fda2ceba41da15d4095d1da392a0d2f8ed0c6c7bc0f4cfac8c280b56d",
   maxStalenessSeconds: parseInt(process.env.MAX_STALENESS_SECONDS || "60"),
@@ -76,7 +76,7 @@ const DEFAULT_CONFIG: KeeperConfig = {
 const IDL: any = {
   version: "0.1.0",
   name: "pm15",
-  address: "gNFRULGxFu27mYmbeZ6oeeZhYMhZkWivqD2eCvEDLqE",
+  address: "EEeQgeh56xge6y82xU9K8sb2PfPs9nXHh3fHrNEwdcrU",
   metadata: { name: "pm15", version: "0.1.0", spec: "0.1.0" },
   instructions: [
     {

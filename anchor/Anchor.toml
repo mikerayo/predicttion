@@ -3,7 +3,7 @@ seeds = true
 skip-lint = false
 
 [programs.devnet]
-pm15 = "gNFRULGxFu27mYmbeZ6oeeZhYMhZkWivqD2eCvEDLqE"
+pm15 = "EEeQgeh56xge6y82xU9K8sb2PfPs9nXHh3fHrNEwdcrU"
 
 [registry]
 url = "https://api.apr.dev"

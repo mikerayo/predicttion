@@ -18,7 +18,7 @@ Preferred communication style: Simple, everyday language.
 ## Current Implementation Status
 
 ### Deployed Program
-- **Program ID:** `gNFRULGxFu27mYmbeZ6oeeZhYMhZkWivqD2eCvEDLqE` (Solana Devnet)
+- **Program ID:** `EEeQgeh56xge6y82xU9K8sb2PfPs9nXHh3fHrNEwdcrU` (Solana Devnet)
 - **Anchor Version:** 0.30.1
 - **Deployment:** Via GitHub Actions CI/CD
 
