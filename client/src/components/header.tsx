@@ -1,8 +1,19 @@
-import { TrendingUp, Wallet, Activity } from "lucide-react";
+import { TrendingUp, Wallet, Activity, ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ThemeToggle } from "./theme-toggle";
 import { lamportsToSol } from "@shared/schema";
+import { useQuery } from "@tanstack/react-query";
+
+interface PythPrice {
+  feedId: string;
+  price: number;
+  priceInt: number;
+  expo: number;
+  conf: number;
+  publishTime: number;
+  emaPrice: number;
+}
 
 interface HeaderProps {
   walletConnected: boolean;
@@ -19,15 +30,23 @@ export function Header({
   onConnectWallet,
   onDisconnectWallet,
 }: HeaderProps) {
+  const { data: pythPrice, isLoading: isPriceLoading } = useQuery<PythPrice>({
+    queryKey: ["/api/prices/current"],
+    refetchInterval: 3000,
+  });
+
   const truncateAddress = (address: string) => {
     return `${address.slice(0, 4)}...${address.slice(-4)}`;
   };
+
+  const priceChange = pythPrice ? pythPrice.price - pythPrice.emaPrice : 0;
+  const isPositive = priceChange >= 0;
 
   return (
     <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex h-16 items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
               <div className="flex h-9 w-9 items-center justify-center rounded-md bg-primary">
                 <TrendingUp className="h-5 w-5 text-primary-foreground" />
@@ -36,6 +55,28 @@ export function Header({
                 <span className="font-semibold text-lg leading-tight">SOL15</span>
                 <span className="text-xs text-muted-foreground leading-tight">Prediction Markets</span>
               </div>
+            </div>
+
+            <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-md bg-muted/50 border">
+              <span className="text-xs text-muted-foreground">SOL/USD</span>
+              {isPriceLoading ? (
+                <span className="text-sm font-mono font-medium animate-pulse">...</span>
+              ) : pythPrice ? (
+                <div className="flex items-center gap-1.5" data-testid="text-live-price">
+                  <span className="text-sm font-mono font-semibold">
+                    ${pythPrice.price.toFixed(2)}
+                  </span>
+                  <div className={`flex items-center ${isPositive ? "text-trade-up" : "text-trade-down"}`}>
+                    {isPositive ? (
+                      <ArrowUpRight className="h-3.5 w-3.5" />
+                    ) : (
+                      <ArrowDownRight className="h-3.5 w-3.5" />
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <span className="text-sm font-mono text-muted-foreground">--</span>
+              )}
             </div>
           </div>
 
