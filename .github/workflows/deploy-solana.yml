@@ -89,10 +89,21 @@ jobs:
           echo "Solana version: $(solana --version)"
           echo "Anchor version: $(anchor --version)"
           
+          # Show current dependency specification
+          echo "Cargo.toml dependencies:"
+          cat programs/pm15/Cargo.toml | grep -A5 dependencies
+          
           # Remove any existing Cargo.lock to avoid version conflicts
           rm -f Cargo.lock
           
-          # Build with Anchor - it will handle dependency resolution
+          # Generate fresh lockfile and update all dependencies
+          cargo update
+          
+          # Show what versions were resolved
+          echo "Resolved pyth SDK version:"
+          cargo tree -p pyth-solana-receiver-sdk 2>/dev/null || echo "Could not show tree"
+          
+          # Build with Anchor
           anchor build 2>&1 | tee build_output.txt
           BUILD_EXIT_CODE=${PIPESTATUS[0]}
           
