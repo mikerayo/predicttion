@@ -37,7 +37,7 @@ export interface SolanaClientConfig {
 
 const DEFAULT_CONFIG: SolanaClientConfig = {
   rpcUrl: "https://api.devnet.solana.com",
-  programId: "GEqMQayWYNssnTKPVus8u3yuCFt2xqqfzSyqijqRuiko",
+  programId: "gNFRULGxFu27mYmbeZ6oeeZhYMhZkWivqD2eCvEDLqE",
   pythReceiverProgramId: "rec5EKMGg6MxZYaMdyBfgwp4d5rB9T1VQH5pJv5LtFJ",
   solUsdFeedId: "0xef0d8b6fda2ceba41da15d4095d1da392a0d2f8ed0c6c7bc0f4cfac8c280b56d",
 };
@@ -45,7 +45,7 @@ const DEFAULT_CONFIG: SolanaClientConfig = {
 const IDL: any = {
   version: "0.1.0",
   name: "pm15",
-  address: "GEqMQayWYNssnTKPVus8u3yuCFt2xqqfzSyqijqRuiko",
+  address: "gNFRULGxFu27mYmbeZ6oeeZhYMhZkWivqD2eCvEDLqE",
   metadata: { name: "pm15", version: "0.1.0", spec: "0.1.0" },
   instructions: [
     {

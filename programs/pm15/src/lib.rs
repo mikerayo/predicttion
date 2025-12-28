@@ -2,7 +2,7 @@ use anchor_lang::prelude::*;
 use anchor_lang::solana_program::{program::invoke_signed, system_instruction};
 use pyth_solana_receiver_sdk::price_update::PriceUpdateV2;
 
-declare_id!("GEqMQayWYNssnTKPVus8u3yuCFt2xqqfzSyqijqRuiko");
+declare_id!("gNFRULGxFu27mYmbeZ6oeeZhYMhZkWivqD2eCvEDLqE");
 
 pub const FEE_BPS: u16 = 100; // 1%
 pub const MIN_BET_LAMPORTS: u64 = 10_000_000; // 0.01 SOL

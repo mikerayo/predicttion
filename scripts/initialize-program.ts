@@ -24,7 +24,7 @@ import {
 import { BN } from "bn.js";
 import bs58 from "bs58";
 
-const PROGRAM_ID = new PublicKey("GEqMQayWYNssnTKPVus8u3yuCFt2xqqfzSyqijqRuiko");
+const PROGRAM_ID = new PublicKey("gNFRULGxFu27mYmbeZ6oeeZhYMhZkWivqD2eCvEDLqE");
 const SOL_USD_FEED_ID = "0xef0d8b6fda2ceba41da15d4095d1da392a0d2f8ed0c6c7bc0f4cfac8c280b56d";
 
 const CONFIG = {
