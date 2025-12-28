@@ -1,0 +1,101 @@
+name: Deploy Solana Program
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'programs/**'
+      - 'anchor/**'
+  workflow_dispatch:
+    inputs:
+      network:
+        description: 'Network to deploy to'
+        required: true
+        default: 'devnet'
+        type: choice
+        options:
+          - devnet
+          - mainnet-beta
+
+env:
+  SOLANA_VERSION: '1.18.17'
+  ANCHOR_VERSION: '0.29.0'
+  RUST_TOOLCHAIN: 'stable'
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Rust
+        uses: dtolnay/rust-action@stable
+        with:
+          toolchain: ${{ env.RUST_TOOLCHAIN }}
+
+      - name: Cache Cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Install Solana CLI
+        run: |
+          sh -c "$(curl -sSfL https://release.solana.com/v${{ env.SOLANA_VERSION }}/install)"
+          echo "$HOME/.local/share/solana/install/active_release/bin" >> $GITHUB_PATH
+
+      - name: Install Anchor CLI
+        run: |
+          cargo install --git https://github.com/coral-xyz/anchor --tag v${{ env.ANCHOR_VERSION }} anchor-cli --locked
+
+      - name: Setup Solana wallet
+        run: |
+          mkdir -p ~/.config/solana
+          echo "${{ secrets.SOLANA_PRIVATE_KEY }}" > ~/.config/solana/id.json
+          chmod 600 ~/.config/solana/id.json
+
+      - name: Configure Solana network
+        run: |
+          NETWORK=${{ github.event.inputs.network || 'devnet' }}
+          if [ "$NETWORK" = "mainnet-beta" ]; then
+            solana config set --url https://api.mainnet-beta.solana.com
+          else
+            solana config set --url https://api.devnet.solana.com
+          fi
+          solana config set --keypair ~/.config/solana/id.json
+
+      - name: Check wallet balance
+        run: |
+          echo "Wallet address:"
+          solana address
+          echo "Balance:"
+          solana balance
+
+      - name: Build Anchor program
+        working-directory: programs/pm15
+        run: anchor build
+
+      - name: Deploy to Solana
+        working-directory: programs/pm15
+        run: |
+          NETWORK=${{ github.event.inputs.network || 'devnet' }}
+          echo "Deploying to $NETWORK..."
+          anchor deploy --provider.cluster $NETWORK
+
+      - name: Output Program ID
+        working-directory: programs/pm15
+        run: |
+          echo "Program deployed successfully!"
+          if [ -f target/deploy/pm15-keypair.json ]; then
+            echo "Program ID: $(solana address -k target/deploy/pm15-keypair.json)"
+          else
+            echo "Check deploy logs for Program ID"
+          fi
