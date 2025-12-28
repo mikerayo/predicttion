@@ -49,10 +49,23 @@ jobs:
 
       - name: Install Solana and Anchor
         run: |
-          # Install Solana CLI
+          # Install Solana CLI with multiple fallbacks
           if [ ! -f "$HOME/.local/share/solana/install/active_release/bin/solana" ]; then
             echo "Installing Solana CLI v$SOLANA_VERSION..."
-            sh -c "$(curl -sSfL https://release.solana.com/v$SOLANA_VERSION/install)"
+            
+            # Try Anza URL first (new infrastructure), then Solana Labs, then direct download
+            if curl -4 --retry 3 --retry-delay 2 --max-time 120 -sSfL "https://release.anza.xyz/v$SOLANA_VERSION/install" | sh; then
+              echo "Installed from Anza"
+            elif curl -4 --retry 3 --retry-delay 2 --max-time 120 -sSfL "https://release.solana.com/v$SOLANA_VERSION/install" | sh; then
+              echo "Installed from Solana Labs"
+            else
+              echo "Downloading from GitHub releases..."
+              curl -4 -L "https://github.com/solana-labs/solana/releases/download/v$SOLANA_VERSION/solana-release-x86_64-unknown-linux-gnu.tar.bz2" -o solana.tar.bz2
+              tar -xjf solana.tar.bz2
+              mkdir -p "$HOME/.local/share/solana/install/active_release"
+              mv solana-release/* "$HOME/.local/share/solana/install/active_release/"
+              rm -rf solana.tar.bz2 solana-release
+            fi
           else
             echo "Solana CLI already cached"
           fi
