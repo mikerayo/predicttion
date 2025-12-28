@@ -26,7 +26,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Anchor (includes Solana CLI + Rust)
+      - name: Install Rust 1.75 (for lockfile v3 compatibility)
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: 1.75.0
+          
+      - name: Setup Anchor (includes Solana CLI)
         uses: metadaoproject/setup-anchor@v3.3
         with:
           anchor-version: '0.30.1'

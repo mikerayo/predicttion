@@ -1,0 +1,42 @@
+Run echo "Building Anchor program..."
+Building Anchor program...
+Removed Cargo.lock (will be regenerated)
+WARNING: `@coral-xyz/anchor` version(^0.32.1) and the current CLI version(0.30.1) don't match.
+	This can lead to unwanted behavior. To fix, upgrade the package by running:
+	yarn upgrade @coral-xyz/anchor@0.30.1
+error: failed to parse lock file at: /home/runner/work/predicttion/predicttion/Cargo.lock
+Caused by:
+  lock file version 4 requires `-Znext-lockfile-bump`
+Build artifacts:
+total 12
+drwxr-xr-x 2 runner runner 4096 Dec 28 17:20 .
+drwxr-xr-x 5 runner runner 4096 Dec 28 17:20 ..
+-rw------- 1 runner runner  229 Dec 28 17:20 pm15-keypair.json
+ERROR: Build failed - pm15.so not found
+Build output:
+WARNING: `@coral-xyz/anchor` version(^0.32.1) and the current CLI version(0.30.1) don't match.
+	This can lead to unwanted behavior. To fix, upgrade the package by running:
+	yarn upgrade @coral-xyz/anchor@0.30.1
+error: failed to parse lock file at: /home/runner/work/predicttion/predicttion/Cargo.lock
+Caused by:
+  lock file version 4 requires `-Znext-lockfile-bump`
+Error: Process completed with exit code 1.
+0s
+0s
+0s
+Post job cleanup.
+0s
+Post job cleanup.
+/usr/bin/git version
+git version 2.52.0
+Temporarily overriding HOME='/home/runner/work/_temp/fd95827b-c24b-426f-bcd5-91488e377d7e' before making global git config changes
+Adding repository directory to the temporary git global config as a safe directory
+/usr/bin/git config --global --add safe.directory /home/runner/work/predicttion/predicttion
+/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+http.https://github.com/.extraheader
+/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
