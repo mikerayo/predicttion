@@ -322,8 +322,11 @@ pub struct InitializeConfig<'info> {
     )]
     pub config: Account<'info, Config>,
     
-    /// CHECK: PDA for treasury, no data
+    /// CHECK: PDA for treasury, holds lamports only
     #[account(
+        init,
+        payer = authority,
+        space = 0,
         seeds = [b"treasury_vault"],
         bump
     )]
@@ -350,8 +353,11 @@ pub struct CreateMarket<'info> {
     )]
     pub market: Account<'info, Market>,
     
-    /// CHECK: PDA for market vault, no data
+    /// CHECK: PDA for market vault, holds lamports only
     #[account(
+        init,
+        payer = payer,
+        space = 0,
         seeds = [b"market_vault", market.key().as_ref()],
         bump
     )]
