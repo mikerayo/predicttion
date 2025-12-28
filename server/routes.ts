@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { placeBetSchema, claimSchema, calculateFee } from "@shared/schema";
+import { getSolUsdPrice, getFeedId } from "./pythService";
 
 const MOCK_USER_PUBKEY = "7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU";
 
@@ -10,6 +11,16 @@ export async function registerRoutes(
   app: Express
 ): Promise<Server> {
   
+  app.get("/api/prices/current", async (_req, res) => {
+    try {
+      const price = await getSolUsdPrice();
+      res.json(price);
+    } catch (error) {
+      console.error("Error fetching price:", error);
+      res.status(500).json({ error: "Failed to fetch SOL/USD price" });
+    }
+  });
+
   app.get("/api/markets", async (_req, res) => {
     try {
       const markets = await storage.getMarkets();
@@ -108,15 +119,14 @@ export async function registerRoutes(
       const now = Math.floor(Date.now() / 1000);
       const alignedStart = Math.floor(now / 900) * 900 + 900;
       
-      const basePrice = 19400 + Math.random() * 100;
-      const priceInt = Math.floor(basePrice * 100000000);
+      const pythPrice = await getSolUsdPrice();
       
       const market = await storage.createMarket({
-        feedId: "0xef0d8b6fda2ceba41da15d4095d1da392a0d2f8ed0c6c7bc0f4cfac8c280b56d",
+        feedId: getFeedId(),
         startTs: alignedStart,
         endTs: alignedStart + 900,
-        startPrice: priceInt,
-        startExpo: -8,
+        startPrice: pythPrice.priceInt,
+        startExpo: pythPrice.expo,
         endPrice: null,
         endExpo: null,
         totalUp: 0,
