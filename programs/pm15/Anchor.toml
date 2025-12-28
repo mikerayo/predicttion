@@ -1,19 +1,3 @@
-[features]
-seeds = true
-skip-lint = false
-
-[programs.devnet]
-pm15 = "EEeQgeh56xge6y82xU9K8sb2PfPs9nXHh3fHrNEwdcrU"
-
-[programs.mainnet]
-pm15 = "EEeQgeh56xge6y82xU9K8sb2PfPs9nXHh3fHrNEwdcrU"
-
-[registry]
-url = "https://api.apr.dev"
-
-[provider]
-cluster = "devnet"
-wallet = "~/.config/solana/id.json"
-
-[scripts]
-test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"
+# This file is kept for backwards compatibility
+# The main Anchor.toml is at the project root
+# See /Anchor.toml for the actual workspace configuration
