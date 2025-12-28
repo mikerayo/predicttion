@@ -29,12 +29,9 @@ jobs:
       - name: Setup Anchor (includes Solana CLI + Rust)
         uses: metadaoproject/setup-anchor@v3.3
         with:
-          anchor-version: '0.30.1'
+          anchor-version: '0.31.0'
           solana-cli-version: '1.18.17'
           node-version: '20'
-          
-      - name: Install Rust stable (override for lockfile compatibility)
-        uses: dtolnay/rust-toolchain@stable
 
       - name: Setup Solana wallet
         run: |
