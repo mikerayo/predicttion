@@ -18,9 +18,9 @@ import {
   PublicKey,
   SystemProgram,
   Transaction,
+  TransactionInstruction,
   sendAndConfirmTransaction,
 } from "@solana/web3.js";
-import * as anchor from "@coral-xyz/anchor";
 import { BN } from "bn.js";
 import bs58 from "bs58";
 
@@ -32,33 +32,6 @@ const CONFIG = {
   minBetLamports: new BN(10_000_000),
   maxStalenessSeconds: 60,
 };
-
-const IDL: anchor.Idl = {
-  version: "0.1.0",
-  name: "pm15",
-  address: PROGRAM_ID.toBase58(),
-  metadata: { name: "pm15", version: "0.1.0", spec: "0.1.0" },
-  instructions: [
-    {
-      name: "initializeConfig",
-      accounts: [
-        { name: "config", isMut: true, isSigner: false },
-        { name: "treasuryVault", isMut: true, isSigner: false },
-        { name: "authority", isMut: true, isSigner: true },
-        { name: "systemProgram", isMut: false, isSigner: false },
-      ],
-      args: [
-        { name: "feeBps", type: "u16" },
-        { name: "minBetLamports", type: "u64" },
-        { name: "maxStalenessSeconds", type: "u32" },
-      ],
-    },
-  ],
-  accounts: [],
-  types: [],
-  events: [],
-  errors: [],
-} as any;
 
 function getConfigPda(): [PublicKey, number] {
   return PublicKey.findProgramAddressSync(
@@ -74,9 +47,42 @@ function getTreasuryVaultPda(): [PublicKey, number] {
   );
 }
 
-function feedIdToBuffer(feedId: string): Buffer {
-  const hex = feedId.startsWith("0x") ? feedId.slice(2) : feedId;
-  return Buffer.from(hex, "hex");
+function createInitializeConfigInstruction(
+  config: PublicKey,
+  treasuryVault: PublicKey,
+  authority: PublicKey,
+  feeBps: number,
+  minBetLamports: BN,
+  maxStalenessSeconds: number
+): TransactionInstruction {
+  const discriminator = Buffer.from([208, 127, 21, 1, 194, 190, 196, 70]);
+  
+  const feeBpsBuffer = Buffer.alloc(2);
+  feeBpsBuffer.writeUInt16LE(feeBps);
+  
+  const minBetBuffer = Buffer.alloc(8);
+  minBetLamports.toArrayLike(Buffer, 'le', 8).copy(minBetBuffer);
+  
+  const stalenessBuffer = Buffer.alloc(4);
+  stalenessBuffer.writeUInt32LE(maxStalenessSeconds);
+  
+  const data = Buffer.concat([
+    discriminator,
+    feeBpsBuffer,
+    minBetBuffer,
+    stalenessBuffer,
+  ]);
+
+  return new TransactionInstruction({
+    keys: [
+      { pubkey: config, isSigner: false, isWritable: true },
+      { pubkey: treasuryVault, isSigner: false, isWritable: true },
+      { pubkey: authority, isSigner: true, isWritable: true },
+      { pubkey: SystemProgram.programId, isSigner: false, isWritable: false },
+    ],
+    programId: PROGRAM_ID,
+    data,
+  });
 }
 
 async function checkConfigExists(connection: Connection): Promise<boolean> {
@@ -134,14 +140,6 @@ async function main() {
   const privateKeyEnv = process.env.KEEPER_PRIVATE_KEY;
   if (!privateKeyEnv) {
     console.error("ERROR: KEEPER_PRIVATE_KEY environment variable is required.");
-    console.error("");
-    console.error("Generate a new keypair with:");
-    console.error("  solana-keygen new --outfile keeper.json");
-    console.error("");
-    console.error("Get the base58 private key with:");
-    console.error("  cat keeper.json | jq -r '.[]' | head -64 | tr '\\n' ',' | sed 's/,$//'");
-    console.error("");
-    console.error("Or use an existing wallet's private key (base58 encoded).");
     process.exit(1);
   }
 
@@ -171,35 +169,33 @@ async function main() {
   console.log("");
   console.log("Initializing program...");
 
-  const wallet = new anchor.Wallet(authority);
-  const provider = new anchor.AnchorProvider(
-    connection,
-    wallet,
-    { commitment: "confirmed" }
-  );
-  
-  const program = new anchor.Program(IDL, provider);
-
   try {
-    const tx = await (program.methods as any)
-      .initializeConfig(
-        CONFIG.feeBps,
-        CONFIG.minBetLamports,
-        CONFIG.maxStalenessSeconds
-      )
-      .accounts({
-        config: configPda,
-        treasuryVault: treasuryVaultPda,
-        authority: authority.publicKey,
-        systemProgram: SystemProgram.programId,
-      })
-      .signers([authority])
-      .rpc();
+    const instruction = createInitializeConfigInstruction(
+      configPda,
+      treasuryVaultPda,
+      authority.publicKey,
+      CONFIG.feeBps,
+      CONFIG.minBetLamports,
+      CONFIG.maxStalenessSeconds
+    );
+
+    const transaction = new Transaction().add(instruction);
+    
+    const { blockhash } = await connection.getLatestBlockhash();
+    transaction.recentBlockhash = blockhash;
+    transaction.feePayer = authority.publicKey;
+
+    const signature = await sendAndConfirmTransaction(
+      connection,
+      transaction,
+      [authority],
+      { commitment: "confirmed" }
+    );
 
     console.log("");
     console.log("SUCCESS! Program initialized.");
-    console.log(`Transaction: ${tx}`);
-    console.log(`Explorer: https://explorer.solana.com/tx/${tx}?cluster=devnet`);
+    console.log(`Transaction: ${signature}`);
+    console.log(`Explorer: https://explorer.solana.com/tx/${signature}?cluster=devnet`);
     console.log("");
     console.log("Next steps:");
     console.log("1. Run the keeper service to create markets");
