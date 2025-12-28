@@ -31,21 +31,23 @@ jobs:
         with:
           toolchain: 1.79.0
 
-      - name: Install Solana CLI
-        uses: solana-program/actions/setup-solana@v1
+      - name: Install Solana CLI and setup PATH
+        run: |
+          sh -c "$(curl -sSfL https://release.solana.com/v1.18.17/install)"
+          export PATH="$HOME/.local/share/solana/install/active_release/bin:$PATH"
+          echo "$HOME/.local/share/solana/install/active_release/bin" >> $GITHUB_PATH
+          solana --version
 
       - name: Install Anchor CLI
         run: |
           cargo install --git https://github.com/coral-xyz/anchor --tag v0.30.1 anchor-cli --locked
 
-      - name: Setup Solana wallet
+      - name: Setup Solana wallet and configure network
         run: |
           mkdir -p ~/.config/solana
           echo '${{ secrets.SOLANA_PRIVATE_KEY }}' > ~/.config/solana/id.json
           chmod 600 ~/.config/solana/id.json
-
-      - name: Configure Solana network
-        run: |
+          
           NETWORK=${{ github.event.inputs.network || 'devnet' }}
           if [ "$NETWORK" = "mainnet-beta" ]; then
             solana config set --url https://api.mainnet-beta.solana.com
