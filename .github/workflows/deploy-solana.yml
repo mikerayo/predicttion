@@ -36,7 +36,7 @@ jobs:
       - name: Setup Solana wallet
         run: |
           mkdir -p ~/.config/solana
-          echo "${{ secrets.SOLANA_PRIVATE_KEY }}" > ~/.config/solana/id.json
+          echo '${{ secrets.SOLANA_PRIVATE_KEY }}' > ~/.config/solana/id.json
           chmod 600 ~/.config/solana/id.json
 
       - name: Configure Solana network
@@ -54,33 +54,72 @@ jobs:
           echo "Wallet address:"
           solana address
           echo "Balance:"
-          solana balance
+          BALANCE=$(solana balance | awk '{print $1}')
+          echo "$BALANCE SOL"
+          if (( $(echo "$BALANCE < 3" | bc -l) )); then
+            echo "ERROR: Insufficient balance. Need at least 3 SOL to deploy."
+            exit 1
+          fi
 
       - name: Setup Program Keypair
         working-directory: programs/pm15
         run: |
           mkdir -p target/deploy
-          echo "${{ secrets.PROGRAM_KEYPAIR }}" > target/deploy/pm15-keypair.json
+          echo '${{ secrets.PROGRAM_KEYPAIR }}' > target/deploy/pm15-keypair.json
           chmod 600 target/deploy/pm15-keypair.json
-          echo "Program ID: $(solana address -k target/deploy/pm15-keypair.json)"
+          PROGRAM_ID=$(solana address -k target/deploy/pm15-keypair.json)
+          echo "Program ID: $PROGRAM_ID"
+          echo "PROGRAM_ID=$PROGRAM_ID" >> $GITHUB_ENV
 
       - name: Build Anchor program
         working-directory: programs/pm15
-        run: anchor build
+        run: |
+          echo "Building Anchor program..."
+          anchor build
+          echo ""
+          echo "Build artifacts:"
+          ls -la target/deploy/
+          if [ ! -f target/deploy/pm15.so ]; then
+            echo "ERROR: Build failed - pm15.so not found"
+            exit 1
+          fi
+          echo ""
+          echo "Program binary size:"
+          ls -lh target/deploy/pm15.so
 
       - name: Deploy to Solana
         working-directory: programs/pm15
         run: |
           NETWORK=${{ github.event.inputs.network || 'devnet' }}
           echo "Deploying to $NETWORK..."
-          anchor deploy --provider.cluster $NETWORK
+          echo "Program ID: $PROGRAM_ID"
+          echo ""
+          
+          # Run deploy and capture output
+          anchor deploy --provider.cluster $NETWORK 2>&1 | tee deploy_output.txt
+          
+          # Check if deploy actually succeeded by verifying program exists
+          echo ""
+          echo "Verifying deployment..."
+          sleep 5
+          
+          if solana program show $PROGRAM_ID --url https://api.devnet.solana.com; then
+            echo ""
+            echo "SUCCESS: Program verified on-chain!"
+          else
+            echo ""
+            echo "ERROR: Program not found on-chain after deployment"
+            echo "Deploy output was:"
+            cat deploy_output.txt
+            exit 1
+          fi
 
       - name: Output Program ID
-        working-directory: programs/pm15
         run: |
-          echo "Program deployed successfully!"
-          if [ -f target/deploy/pm15-keypair.json ]; then
-            echo "Program ID: $(solana address -k target/deploy/pm15-keypair.json)"
-          else
-            echo "Check deploy logs for Program ID"
-          fi
+          echo "=============================================="
+          echo "DEPLOYMENT SUCCESSFUL"
+          echo "=============================================="
+          echo "Program ID: $PROGRAM_ID"
+          echo "Network: ${{ github.event.inputs.network || 'devnet' }}"
+          echo "Explorer: https://explorer.solana.com/address/$PROGRAM_ID?cluster=${{ github.event.inputs.network || 'devnet' }}"
+          echo "=============================================="
