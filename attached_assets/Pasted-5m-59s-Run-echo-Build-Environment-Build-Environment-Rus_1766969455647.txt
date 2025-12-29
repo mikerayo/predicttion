@@ -1,0 +1,44 @@
+5m 59s
+Run echo "=== Build Environment ==="
+=== Build Environment ===
+Rust: rustc 1.75.0 (82e1608df 2023-12-21)
+Solana: solana-cli 1.17.31 (src:d0b1f2c7; feat:3746964731, client:SolanaLabs)
+Anchor: anchor-cli 0.29.0
+=== Cargo.toml dependencies ===
+[dependencies]
+anchor-lang = "0.29.0"
+solana-program = "=1.16.23"
+[dependencies.pyth-solana-receiver-sdk]
+git = "https://github.com/pyth-network/pyth-crosschain"
+=== Building ===
+warning: skipping duplicate package `remote-executor-cli` found at `/home/runner/.cargo/git/checkouts/pyth-crosschain-7e1f04018195d527/7612ad8/pythnet/stake_caps_parameters/cli`
+    Updating crates.io index
+error: failed to select a version for `solana-pubkey`.
+    ... required by package `solana-loader-v3-interface v3.0.0`
+    ... which satisfies dependency `solana-loader-v3-interface = "^3"` (locked to 3.0.0) of package `anchor-lang v0.32.1`
+    ... which satisfies dependency `anchor-lang = ">=0.28.0"` (locked to 0.32.1) of package `pyth-solana-receiver-sdk v0.3.2 (https://github.com/pyth-network/pyth-crosschain?rev=7612ad84681d7f3de7632c9761afd9df6623e9e8#7612ad84)`
+    ... which satisfies git dependency `pyth-solana-receiver-sdk` (locked to 0.3.2) of package `pm15 v0.1.0 (/home/runner/work/predicttion/predicttion/programs/pm15)`
+versions that meet the requirements `^2.2.1` (locked to 2.4.0) are: 2.4.0
+the package `solana-loader-v3-interface` depends on `solana-pubkey`, with features: `solana-sha256-hasher` but `solana-pubkey` does not have these features.
+ It has an optional dependency with that name, but that dependency uses the "dep:" syntax in the features table, so it does not have an implicit feature with that name.
+failed to select a version for `solana-pubkey` which could resolve this conflict
+=== Build artifacts ===
+total 12
+drwxr-xr-x 2 runner runner 4096 Dec 29 00:44 .
+drwxr-xr-x 5 runner runner 4096 Dec 29 00:44 ..
+-rw------- 1 runner runner  229 Dec 29 00:44 pm15-keypair.json
+ERROR: Build failed - pm15.so not found
+warning: skipping duplicate package `remote-executor-cli` found at `/home/runner/.cargo/git/checkouts/pyth-crosschain-7e1f04018195d527/7612ad8/pythnet/stake_caps_parameters/cli`
+    Updating crates.io index
+error: failed to select a version for `solana-pubkey`.
+    ... required by package `solana-loader-v3-interface v3.0.0`
+    ... which satisfies dependency `solana-loader-v3-interface = "^3"` (locked to 3.0.0) of package `anchor-lang v0.32.1`
+    ... which satisfies dependency `anchor-lang = ">=0.28.0"` (locked to 0.32.1) of package `pyth-solana-receiver-sdk v0.3.2 (https://github.com/pyth-network/pyth-crosschain?rev=7612ad84681d7f3de7632c9761afd9df6623e9e8#7612ad84)`
+    ... which satisfies git dependency `pyth-solana-receiver-sdk` (locked to 0.3.2) of package `pm15 v0.1.0 (/home/runner/work/predicttion/predicttion/programs/pm15)`
+versions that meet the requirements `^2.2.1` (locked to 2.4.0) are: 2.4.0
+the package `solana-loader-v3-interface` depends on `solana-pubkey`, with features: `solana-sha256-hasher` but `solana-pubkey` does not have these features.
+ It has an optional dependency with that name, but that dependency uses the "dep:" syntax in the features table, so it does not have an implicit feature with that name.
+failed to select a version for `solana-pubkey` which could resolve this conflict
+Error: Process completed with exit code 1.
+0s
+0s

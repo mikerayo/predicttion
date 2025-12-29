@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::{program::invoke_signed, system_instruction};
-use pyth_solana_receiver_sdk::price_update::PriceUpdateV2;
+use borsh::{BorshDeserialize, BorshSerialize};
 
 declare_id!("EEeQgeh56xge6y82xU9K8sb2PfPs9nXHh3fHrNEwdcrU");
 
@@ -14,6 +14,99 @@ pub const SOL_USD_FEED_ID: [u8; 32] = [
     0xef, 0x0d, 0x8b, 0x6f, 0xda, 0x2c, 0xeb, 0xa4, 0x1d, 0xa1, 0x5d, 0x40, 0x95, 0xd1, 0xda, 0x39,
     0x2a, 0x0d, 0x2f, 0x8e, 0xd0, 0xc6, 0xc7, 0xbc, 0x0f, 0x4c, 0xfa, 0xc8, 0xc2, 0x80, 0xb5, 0x6d,
 ];
+
+// Pyth Solana Receiver Program ID on devnet
+pub const PYTH_RECEIVER_PROGRAM: Pubkey = solana_program::pubkey!("rec5EKMGg6MxZYaMdyBfgwp4d5rB9T1VQH5pJv5LtFJ");
+
+// Manual Pyth PriceUpdateV2 deserialization (avoids SDK dependency conflict)
+#[derive(Clone, Copy, Debug, BorshSerialize, BorshDeserialize)]
+pub struct PythPrice {
+    pub price: i64,
+    pub conf: u64,
+    pub exponent: i32,
+    pub publish_time: i64,
+}
+
+pub fn parse_price_update(
+    account_info: &AccountInfo,
+    max_staleness: u64,
+    clock: &Clock,
+    expected_feed_id: &[u8; 32],
+) -> Result<PythPrice> {
+    // Verify account is owned by Pyth Receiver program
+    require!(
+        *account_info.owner == PYTH_RECEIVER_PROGRAM,
+        PredictionError::InvalidPythAccount
+    );
+    
+    let data = account_info.try_borrow_data()?;
+    
+    // PriceUpdateV2 layout:
+    // - discriminator: 8 bytes
+    // - write_authority: 32 bytes  
+    // - verification_level: 1 byte
+    // - price_message:
+    //   - feed_id: 32 bytes
+    //   - price: i64 (8 bytes)
+    //   - conf: u64 (8 bytes)  
+    //   - exponent: i32 (4 bytes)
+    //   - publish_time: i64 (8 bytes)
+    //   - prev_publish_time: i64 (8 bytes)
+    //   - ema_price: i64 (8 bytes)
+    //   - ema_conf: u64 (8 bytes)
+    // - posted_slot: u64 (8 bytes)
+    
+    const MIN_SIZE: usize = 8 + 32 + 1 + 32 + 8 + 8 + 4 + 8 + 8 + 8 + 8 + 8;
+    require!(data.len() >= MIN_SIZE, PredictionError::InvalidPythAccount);
+    
+    // Read feed_id at offset 41 (8 discriminator + 32 write_authority + 1 verification_level)
+    let feed_id_offset = 41;
+    let feed_id: [u8; 32] = data[feed_id_offset..feed_id_offset + 32]
+        .try_into()
+        .map_err(|_| PredictionError::InvalidPythAccount)?;
+    
+    require!(feed_id == *expected_feed_id, PredictionError::InvalidFeedId);
+    
+    // Read price data
+    let price_offset = feed_id_offset + 32;
+    let price = i64::from_le_bytes(
+        data[price_offset..price_offset + 8]
+            .try_into()
+            .map_err(|_| PredictionError::InvalidPythAccount)?
+    );
+    
+    let conf_offset = price_offset + 8;
+    let conf = u64::from_le_bytes(
+        data[conf_offset..conf_offset + 8]
+            .try_into()
+            .map_err(|_| PredictionError::InvalidPythAccount)?
+    );
+    
+    let expo_offset = conf_offset + 8;
+    let exponent = i32::from_le_bytes(
+        data[expo_offset..expo_offset + 4]
+            .try_into()
+            .map_err(|_| PredictionError::InvalidPythAccount)?
+    );
+    
+    let time_offset = expo_offset + 4;
+    let publish_time = i64::from_le_bytes(
+        data[time_offset..time_offset + 8]
+            .try_into()
+            .map_err(|_| PredictionError::InvalidPythAccount)?
+    );
+    
+    // Check staleness
+    let age = clock.unix_timestamp.saturating_sub(publish_time);
+    require!(age >= 0 && age <= max_staleness as i64, PredictionError::StalePrice);
+    
+    Ok(PythPrice {
+        price,
+        conf,
+        exponent,
+        publish_time,
+    })
+}
 
 #[program]
 pub mod pm15 {
@@ -40,18 +133,18 @@ pub mod pm15 {
 
     pub fn create_market(ctx: Context<CreateMarket>, start_ts: i64) -> Result<()> {
         let config = &ctx.accounts.config;
-        let price_update = &ctx.accounts.price_update;
         
         // Validate start_ts is in the future
         let clock = Clock::get()?;
         require!(start_ts > clock.unix_timestamp, PredictionError::InvalidStartTime);
         
         // Read price from Pyth oracle
-        let price_data = price_update.get_price_no_older_than(
-            &clock,
+        let price_data = parse_price_update(
+            &ctx.accounts.price_update,
             config.max_staleness_seconds as u64,
+            &clock,
             &config.allowed_feed_id,
-        ).map_err(|_| PredictionError::StalePrice)?;
+        )?;
         
         let market = &mut ctx.accounts.market;
         market.feed_id = config.allowed_feed_id;
@@ -154,18 +247,18 @@ pub mod pm15 {
     pub fn resolve_market(ctx: Context<ResolveMarket>) -> Result<()> {
         let config = &ctx.accounts.config;
         let market = &mut ctx.accounts.market;
-        let price_update = &ctx.accounts.price_update;
         
         // Validate market is closed
         require!(market.status == MarketStatus::Closed, PredictionError::MarketNotClosed);
         
         // Read end price from Pyth oracle
         let clock = Clock::get()?;
-        let price_data = price_update.get_price_no_older_than(
-            &clock,
+        let price_data = parse_price_update(
+            &ctx.accounts.price_update,
             config.max_staleness_seconds as u64,
+            &clock,
             &config.allowed_feed_id,
-        ).map_err(|_| PredictionError::StalePrice)?;
+        )?;
         
         market.end_price = price_data.price;
         market.end_expo = price_data.exponent;
@@ -363,7 +456,8 @@ pub struct CreateMarket<'info> {
     )]
     pub market_vault: SystemAccount<'info>,
     
-    pub price_update: Account<'info, PriceUpdateV2>,
+    /// CHECK: Pyth PriceUpdateV2 account, validated in instruction
+    pub price_update: AccountInfo<'info>,
     
     #[account(mut)]
     pub payer: Signer<'info>,
@@ -424,7 +518,8 @@ pub struct ResolveMarket<'info> {
     #[account(mut)]
     pub market: Account<'info, Market>,
     
-    pub price_update: Account<'info, PriceUpdateV2>,
+    /// CHECK: Pyth PriceUpdateV2 account, validated in instruction
+    pub price_update: AccountInfo<'info>,
 }
 
 #[derive(Accounts)]
@@ -569,4 +664,8 @@ pub enum PredictionError {
     Overflow,
     #[msg("Unauthorized")]
     Unauthorized,
+    #[msg("Invalid Pyth price update account")]
+    InvalidPythAccount,
+    #[msg("Feed ID does not match expected")]
+    InvalidFeedId,
 }

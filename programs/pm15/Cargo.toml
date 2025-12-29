@@ -17,8 +17,4 @@ default = []
 
 [dependencies]
 anchor-lang = "0.29.0"
-solana-program = "=1.16.23"
-
-[dependencies.pyth-solana-receiver-sdk]
-git = "https://github.com/pyth-network/pyth-crosschain"
-rev = "7612ad84681d7f3de7632c9761afd9df6623e9e8"
+borsh = "0.10"
