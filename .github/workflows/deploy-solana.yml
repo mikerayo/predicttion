@@ -116,6 +116,7 @@ jobs:
           cargo update -p toml_datetime --precise 0.6.5 2>/dev/null || true
           cargo update -p toml_edit --precise 0.21.0 2>/dev/null || true
           cargo update -p toml --precise 0.8.8 2>/dev/null || true
+          cargo update -p borsh --precise 1.5.1 2>/dev/null || true
           cd ../..
           echo "Dependencies pinned"
 
