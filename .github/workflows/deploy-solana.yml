@@ -19,8 +19,8 @@ on:
           - mainnet-beta
 
 env:
-  SOLANA_VERSION: '1.17.31'
-  ANCHOR_VERSION: '0.29.0'
+  SOLANA_VERSION: '1.18.17'
+  ANCHOR_VERSION: '0.30.1'
 
 jobs:
   build-and-deploy:
@@ -108,17 +108,6 @@ jobs:
           PROGRAM_ID=$(solana address -k target/deploy/pm15-keypair.json)
           echo "Program ID: $PROGRAM_ID"
           echo "PROGRAM_ID=$PROGRAM_ID" >> $GITHUB_ENV
-
-      - name: Pin dependency versions for Rust 1.68 compatibility
-        run: |
-          echo "Pinning dependencies compatible with Solana BPF toolchain (Rust 1.68)..."
-          cd programs/pm15
-          cargo update -p toml_datetime --precise 0.6.5 2>/dev/null || true
-          cargo update -p toml_edit --precise 0.21.0 2>/dev/null || true
-          cargo update -p toml --precise 0.8.8 2>/dev/null || true
-          cargo update -p borsh --precise 1.5.1 2>/dev/null || true
-          cd ../..
-          echo "Dependencies pinned"
 
       - name: Build Anchor program
         run: |
