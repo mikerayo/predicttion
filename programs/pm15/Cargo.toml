@@ -21,5 +21,4 @@ solana-program = "=1.16.23"
 
 [dependencies.pyth-solana-receiver-sdk]
 git = "https://github.com/pyth-network/pyth-crosschain"
-rev = "f2b5f33"
-package = "pyth-solana-receiver-sdk"
+rev = "7612ad84681d7f3de7632c9761afd9df6623e9e8"

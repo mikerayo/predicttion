@@ -1,0 +1,50 @@
+29s
+Run echo "=== Build Environment ==="
+=== Build Environment ===
+Rust: rustc 1.75.0 (82e1608df 2023-12-21)
+Solana: solana-cli 1.17.31 (src:d0b1f2c7; feat:3746964731, client:SolanaLabs)
+Anchor: anchor-cli 0.29.0
+
+=== Cargo.toml dependencies ===
+[dependencies]
+anchor-lang = "0.29.0"
+solana-program = "=1.16.23"
+
+[dependencies.pyth-solana-receiver-sdk]
+git = "https://github.com/pyth-network/pyth-crosschain"
+
+=== Building ===
+[2025-12-29T00:27:43.057741694Z ERROR cargo_build_sbf] Failed to obtain package metadata: `cargo metadata` exited with an error:     Updating crates.io index
+        Updating git repository `https://github.com/pyth-network/pyth-crosschain`
+    error: failed to get `pyth-solana-receiver-sdk` as a dependency of package `pm15 v0.1.0 (/home/runner/work/predicttion/predicttion/programs/pm15)`
+    
+    Caused by:
+      failed to load source for dependency `pyth-solana-receiver-sdk`
+    
+    Caused by:
+      Unable to update https://github.com/pyth-network/pyth-crosschain?rev=f2b5f33
+    
+    Caused by:
+      revspec 'f2b5f33' not found; class=Reference (4); code=NotFound (-3)
+    
+
+=== Build artifacts ===
+total 12
+drwxr-xr-x 2 runner runner 4096 Dec 29 00:27 .
+drwxr-xr-x 5 runner runner 4096 Dec 29 00:27 ..
+-rw------- 1 runner runner  229 Dec 29 00:27 pm15-keypair.json
+
+ERROR: Build failed - pm15.so not found
+[2025-12-29T00:27:43.057741694Z ERROR cargo_build_sbf] Failed to obtain package metadata: `cargo metadata` exited with an error:     Updating crates.io index
+        Updating git repository `https://github.com/pyth-network/pyth-crosschain`
+    error: failed to get `pyth-solana-receiver-sdk` as a dependency of package `pm15 v0.1.0 (/home/runner/work/predicttion/predicttion/programs/pm15)`
+    
+    Caused by:
+      failed to load source for dependency `pyth-solana-receiver-sdk`
+    
+    Caused by:
+      Unable to update https://github.com/pyth-network/pyth-crosschain?rev=f2b5f33
+    
+    Caused by:
+      revspec 'f2b5f33' not found; class=Reference (4); code=NotFound (-3)
+    
