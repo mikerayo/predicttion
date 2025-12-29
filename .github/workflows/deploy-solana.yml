@@ -109,6 +109,12 @@ jobs:
           echo "Program ID: $PROGRAM_ID"
           echo "PROGRAM_ID=$PROGRAM_ID" >> $GITHUB_ENV
 
+      - name: Pin borsh for Rust 1.75 compatibility
+        run: |
+          echo "Pinning borsh to version compatible with Solana 1.18 toolchain (Rust 1.75)..."
+          cargo update -p borsh --precise 1.5.1
+          echo "borsh pinned to 1.5.1"
+
       - name: Build Anchor program
         run: |
           echo "=== Build Environment ==="
